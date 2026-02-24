@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMYN — Community Feed</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --obsidian: #0a0a0a;
+  --void: #070707;
+  --panel: #0e0e0e;
+  --panel2: #131313;
+  --panel3: #181818;
+  --white: #f0ede8;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim: rgba(201,168,76,0.1);
+  --gold-border: rgba(201,168,76,0.22);
+  --teal: #00d4aa;
+  --teal-dim: rgba(0,212,170,0.09);
+  --rose: #e8b4b8;
+  --rose-dim: rgba(232,180,184,0.09);
+  --blue: #7eb8f7;
+  --blue-dim: rgba(126,184,247,0.09);
+  --muted: #555;
+  --mid: #888;
+  --border: rgba(255,255,255,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--obsidian);color:var(--white);font-family:'DM Mono',monospace;min-height:100vh;cursor:none;}
+
+/* CURSOR */
+.cur{width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;top:0;left:0;}
+.cur-ring{width:30px;height:30px;border:1px solid rgba(201,168,76,0.45);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;top:0;left:0;transition:width .2s,height .2s,opacity .2s;}
+
+/* ============ LAYOUT ============ */
+.app-wrap{display:flex;min-height:100vh;}
+
+/* LEFT SIDEBAR */
+.lsidebar{
+  width:260px;flex-shrink:0;
+  background:var(--void);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.lsidebar::-webkit-scrollbar{width:0;}
+.brand{padding:24px 22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.brand-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:5px;color:var(--gold);}
+.brand-tag{background:var(--teal-dim);border:1px solid var(--teal);color:var(--teal);font-size:8px;padding:2px 8px;letter-spacing:1px;}
+
+/* Profile mini */
+.profile-mini{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.pm-ava{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--obsidian);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;flex-shrink:0;}
+.pm-info .pm-name{font-size:12px;color:var(--white);letter-spacing:1px;}
+.pm-info .pm-role{font-size:10px;color:var(--teal);margin-top:2px;letter-spacing:1px;}
+.pm-info .pm-badge{font-size:8px;color:var(--muted);margin-top:2px;}
+
+/* Nav */
+.snav{padding:12px 0;flex:1;}
+.snav-label{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;padding:14px 22px 6px;}
+.snav-item{display:flex;align-items:center;gap:12px;padding:11px 22px;cursor:none;transition:all .2s;border-left:2px solid transparent;font-size:11px;letter-spacing:1px;color:var(--mid);}
+.snav-item:hover{background:rgba(255,255,255,.02);color:var(--white);border-left-color:var(--gold-border);}
+.snav-item.active{background:var(--gold-dim);color:var(--gold);border-left-color:var(--gold);}
+.snav-item .ni{font-size:16px;width:22px;text-align:center;}
+.snav-item .nbadge{margin-left:auto;background:var(--gold);color:var(--obsidian);font-size:8px;padding:2px 6px;font-weight:bold;}
+.nbadge.teal{background:var(--teal);}
+
+/* Trending sidebar */
+.trend-box{padding:16px 22px;border-top:1px solid var(--border);}
+.trend-title{font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;}
+.trend-tag{display:inline-block;border:1px solid var(--border);color:var(--mid);font-size:10px;padding:4px 10px;margin:3px 3px 0 0;cursor:none;transition:all .2s;letter-spacing:1px;}
+.trend-tag:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ============ MAIN FEED ============ */
+.feed-main{flex:1;max-width:680px;padding:0 0 80px;border-right:1px solid var(--border);}
+
+/* Feed header */
+.feed-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,7,7,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+}
+.feed-tabs{display:flex;gap:0;}
+.feed-tab{
+  padding:18px 24px;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);cursor:none;transition:all .2s;border-bottom:2px solid transparent;
+}
+.feed-tab:hover{color:var(--white);}
+.feed-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* CREATE POST */
+.create-post{
+  margin:20px 28px;
+  background:var(--void);border:1px solid var(--border);
+  transition:border-color .3s;
+}
+.create-post:hover{border-color:var(--gold-border);}
+.cp-top{display:flex;gap:14px;padding:18px 20px 14px;align-items:flex-start;}
+.cp-ava{width:38px;height:38px;border-radius:50%;background:var(--gold);color:var(--obsidian);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;flex-shrink:0;}
+.cp-input{
+  flex:1;background:var(--panel2);border:1px solid var(--border);
+  color:var(--white);padding:11px 14px;font-family:'DM Mono',monospace;
+  font-size:12px;resize:none;height:44px;outline:none;transition:all .3s;
+  line-height:1.5;
+}
+.cp-input:focus{border-color:var(--gold);height:90px;background:var(--panel3);}
+.cp-input::placeholder{color:var(--muted);}
+.cp-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 14px;border-top:1px solid var(--border);}
+.cp-actions{display:flex;gap:8px;}
+.cp-action{
+  display:flex;align-items:center;gap:6px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--mid);padding:7px 14px;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;cursor:none;transition:all .2s;
+}
+.cp-action:hover{border-color:var(--gold-border);color:var(--gold);}
+.cp-action .ca-icon{font-size:14px;}
+.post-btn{
+  background:var(--gold);border:none;color:var(--obsidian);
+  padding:9px 24px;font-family:'DM Mono',monospace;
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  cursor:none;transition:all .2s;
+}
+.post-btn:hover{background:var(--gold-light);}
+
+/* POST CARD */
+.post-card{
+  margin:0 28px 20px;
+  background:var(--void);border:1px solid var(--border);
+  transition:border-color .4s;
+  animation:fadeUp .5s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.post-card:hover{border-color:var(--gold-border);}
+
+/* Post header */
+.post-head{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 14px;}
+.ph-left{display:flex;gap:12px;align-items:flex-start;}
+.post-ava{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;border:1px solid var(--border);
+}
+.post-meta{flex:1;}
+.post-author{font-size:13px;color:var(--white);letter-spacing:1px;margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.post-author-name{font-weight:500;}
+.role-badge{
+  font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 8px;border:1px solid;
+}
+.rb-designer{color:var(--rose);border-color:var(--rose);background:var(--rose-dim);}
+.rb-dealer{color:var(--gold);border-color:var(--gold-border);background:var(--gold-dim);}
+.rb-manufacturer{color:var(--teal);border-color:var(--teal);background:var(--teal-dim);}
+.rb-customer{color:var(--blue);border-color:var(--blue);background:var(--blue-dim);}
+.post-location{font-size:10px;color:var(--muted);margin-top:1px;}
+.post-time{font-size:10px;color:var(--muted);}
+.post-menu{
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:none;transition:all .2s;flex-shrink:0;
+}
+.post-menu:hover{border-color:var(--border);color:var(--white);}
+
+/* Post type tag */
+.post-type-strip{
+  margin:0 20px 10px;padding:5px 12px;
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+}
+.pt-news{background:rgba(126,184,247,.08);border:1px solid rgba(126,184,247,.25);color:var(--blue);}
+.pt-showcase{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);}
+.pt-insight{background:var(--teal-dim);border:1px solid rgba(0,212,170,.25);color:var(--teal);}
+.pt-update{background:var(--rose-dim);border:1px solid rgba(232,180,184,.25);color:var(--rose);}
+
+/* Post body */
+.post-body{padding:0 20px 14px;}
+.post-text{font-size:13px;line-height:1.9;color:var(--white);margin-bottom:14px;}
+.post-text em{color:var(--gold);font-style:normal;}
+.post-text a{color:var(--teal);text-decoration:none;}
+
+/* Post image */
+.post-img{
+  margin:0 20px 16px;
+  position:relative;overflow:hidden;
+  border:1px solid var(--border);
+}
+.post-img img{width:100%;height:320px;object-fit:cover;display:block;filter:brightness(.92);}
+.post-img-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.9));
+  padding:32px 16px 14px;font-size:10px;color:var(--mid);letter-spacing:1px;
+}
+
+/* Mosaic grid */
+.post-mosaic{display:grid;gap:2px;margin:0 20px 16px;}
+.mosaic-2{grid-template-columns:1fr 1fr;}
+.mosaic-3{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;}
+.mosaic-3 .m-main{grid-row:1/3;}
+.mosaic-img{
+  overflow:hidden;border:1px solid var(--border);cursor:none;
+  position:relative;
+}
+.mosaic-img img{width:100%;height:160px;object-fit:cover;display:block;transition:transform .4s;filter:brightness(.9);}
+.mosaic-img:hover img{transform:scale(1.05);filter:brightness(1);}
+.mosaic-3 .m-main img{height:322px;}
+
+/* Diamond card in post */
+.diamond-listing-card{
+  margin:0 20px 16px;
+  border:1px solid var(--gold-border);background:var(--panel);
+  display:flex;gap:16px;padding:16px;cursor:none;transition:all .3s;
+}
+.diamond-listing-card:hover{background:var(--gold-dim);}
+.dlc-gem{font-size:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:64px;}
+.dlc-info{flex:1;}
+.dlc-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--gold);margin-bottom:6px;}
+.dlc-specs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.dlc-spec{font-size:9px;letter-spacing:1px;border:1px solid var(--border);padding:3px 8px;color:var(--mid);}
+.dlc-price{font-size:13px;color:var(--white);letter-spacing:1px;}
+.dlc-cta{
+  align-self:center;flex-shrink:0;
+  background:var(--gold);color:var(--obsidian);border:none;
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;padding:9px 18px;cursor:none;transition:all .2s;
+}
+.dlc-cta:hover{background:var(--gold-light);}
+
+/* News card */
+.news-card{
+  margin:0 20px 16px;
+  border:1px solid var(--border);overflow:hidden;cursor:none;transition:all .3s;
+}
+.news-card:hover{border-color:var(--gold-border);}
+.news-img{height:160px;background:linear-gradient(135deg,var(--panel2),var(--panel3));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:64px;}
+.news-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.news-body{padding:14px 16px;}
+.news-source{font-size:9px;letter-spacing:2px;color:var(--blue);text-transform:uppercase;margin-bottom:6px;}
+.news-headline{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;line-height:1.4;color:var(--white);margin-bottom:6px;}
+.news-excerpt{font-size:11px;color:var(--muted);line-height:1.7;}
+
+/* Reactions bar */
+.post-reactions{
+  padding:10px 20px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.reaction-counts{display:flex;align-items:center;gap:12px;}
+.rc-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.rc-emoji{font-size:14px;}
+
+/* Action bar */
+.post-actions{
+  display:flex;border-top:1px solid var(--border);
+  position:relative;
+}
+.pa-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;cursor:none;transition:all .2s;
+  background:transparent;border:none;border-right:1px solid var(--border);
+  color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;position:relative;
+}
+.pa-btn:last-child{border-right:none;}
+.pa-btn:hover{background:var(--panel2);color:var(--white);}
+.pa-btn.reacted{color:var(--gold);}
+.pa-btn.liked{color:var(--rose);}
+.pa-btn .pa-icon{font-size:16px;}
+
+/* Reaction picker */
+.reaction-picker{
+  position:absolute;bottom:calc(100% + 8px);left:0;
+  background:var(--panel);border:1px solid var(--border);
+  display:flex;gap:4px;padding:8px 12px;
+  opacity:0;pointer-events:none;transition:all .2s;
+  transform:translateY(6px);z-index:20;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+}
+.pa-btn:hover .reaction-picker{opacity:1;pointer-events:all;transform:translateY(0);}
+.react-opt{
+  font-size:22px;cursor:none;transition:transform .15s;padding:4px;
+  border-radius:50%;
+}
+.react-opt:hover{transform:scale(1.5);}
+
+/* COMMENTS */
+.comments-section{border-top:1px solid var(--border);display:none;}
+.comments-section.open{display:block;}
+.comment-input-wrap{display:flex;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border);}
+.ci-ava{width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--obsidian);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;}
+.ci-input{
+  flex:1;background:var(--panel2);border:1px solid var(--border);
+  color:var(--white);padding:9px 14px;
+  font-family:'DM Mono',monospace;font-size:11px;
+  outline:none;transition:border-color .2s;
+}
+.ci-input:focus{border-color:var(--gold);}
+.ci-input::placeholder{color:var(--muted);}
+.ci-send{
+  background:transparent;border:1px solid var(--gold-border);
+  color:var(--gold);width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;transition:all .2s;font-size:14px;flex-shrink:0;
+}
+.ci-send:hover{background:var(--gold);color:var(--obsidian);}
+
+.comments-list{padding:0 20px;display:flex;flex-direction:column;gap:0;}
+.comment{
+  display:flex;gap:10px;padding:12px 0;
+  border-bottom:1px solid var(--border);
+  animation:fadeUp .3s ease both;
+}
+.comment:last-child{border-bottom:none;}
+.c-ava{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border);}
+.c-body{flex:1;}
+.c-head{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.c-name{font-size:11px;color:var(--white);letter-spacing:1px;}
+.c-time{font-size:9px;color:var(--muted);}
+.c-text{font-size:12px;color:var(--mid);line-height:1.7;}
+.c-actions{display:flex;gap:12px;margin-top:6px;}
+.c-act{background:transparent;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:none;transition:color .2s;padding:0;}
+.c-act:hover{color:var(--gold);}
+.c-act.liked-c{color:var(--rose);}
+
+/* VIEW MORE COMMENTS */
+.view-more-comments{
+  text-align:center;padding:12px;cursor:none;
+  font-size:10px;letter-spacing:2px;color:var(--muted);
+  transition:color .2s;background:transparent;border:none;
+  font-family:'DM Mono',monospace;width:100%;text-transform:uppercase;
+  border-top:1px solid var(--border);
+}
+.view-more-comments:hover{color:var(--gold);}
+
+/* ============ RIGHT SIDEBAR ============ */
+.rsidebar{
+  width:300px;flex-shrink:0;
+  padding:20px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.rsidebar::-webkit-scrollbar{width:0;}
+.rs-widget{background:var(--void);border:1px solid var(--border);padding:20px;margin-bottom:16px;}
+.rs-title{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* Who to follow */
+.follow-list{display:flex;flex-direction:column;gap:0;}
+.follow-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.follow-item:last-child{border-bottom:none;}
+.fi-ava{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid var(--border);}
+.fi-info{flex:1;min-width:0;}
+.fi-name{font-size:11px;color:var(--white);letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fi-role{font-size:9px;color:var(--muted);margin-top:1px;}
+.fi-follow{
+  background:transparent;border:1px solid var(--gold-border);
+  color:var(--gold);font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;padding:5px 12px;cursor:none;transition:all .2s;flex-shrink:0;
+}
+.fi-follow:hover,.fi-follow.following{background:var(--gold);color:var(--obsidian);}
+
+/* Live feed ticker */
+.live-ticker{overflow:hidden;}
+.ticker-items{display:flex;flex-direction:column;gap:10px;}
+.ticker-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:none;}
+.ticker-item:last-child{border-bottom:none;}
+.ti-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.ti-dot.gold{background:var(--gold);}
+.ti-dot.teal{background:var(--teal);}
+.ti-dot.rose{background:var(--rose);}
+.ti-text{font-size:10px;color:var(--mid);line-height:1.6;}
+.ti-text strong{color:var(--white);}
+.ti-time{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* Stats widget */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
+.stat-box{background:var(--panel);padding:12px;text-align:center;}
+.sb-num{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--gold);line-height:1;}
+.sb-label{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px;text-transform:uppercase;}
+
+/* Story/highlight bar */
+.stories-bar{
+  display:flex;gap:12px;padding:16px 28px;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+.stories-bar::-webkit-scrollbar{height:0;}
+.story-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:none;}
+.story-ring{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--teal));
+  padding:2px;
+}
+.story-inner{
+  width:100%;height:100%;border-radius:50%;border:2px solid var(--obsidian);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.story-name{font-size:9px;color:var(--mid);letter-spacing:1px;text-align:center;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.story-add{background:var(--panel2);border:2px dashed var(--border);}
+.story-add .story-inner{border-color:transparent;font-size:20px;color:var(--muted);}
+
+/* Media upload preview */
+.upload-preview{
+  display:none;flex-wrap:wrap;gap:8px;padding:0 20px 14px;
+}
+.upload-preview.show{display:flex;}
+.up-item{position:relative;}
+.up-img{width:80px;height:80px;object-fit:cover;border:1px solid var(--border);display:block;}
+.up-remove{
+  position:absolute;top:-6px;right:-6px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--obsidian);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;cursor:none;color:var(--mid);transition:all .2s;
+}
+.up-remove:hover{background:var(--rose);color:var(--obsidian);border-color:var(--rose);}
+
+/* Filter bar */
+.filter-bar{
+  display:flex;gap:8px;padding:14px 28px;
+  border-bottom:1px solid var(--border);overflow-x:auto;
+}
+.filter-bar::-webkit-scrollbar{height:0;}
+.filter-chip{
+  flex-shrink:0;background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:1px;padding:6px 14px;
+  cursor:none;transition:all .2s;text-transform:uppercase;
+}
+.filter-chip:hover,.filter-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+
+/* Notification dot */
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);display:inline-block;animation:tdot 1.5s infinite;}
+@keyframes tdot{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Toast notification */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  background:var(--void);border:1px solid var(--gold-border);
+  padding:14px 20px;z-index:9000;display:none;
+  flex-direction:column;gap:4px;
+  animation:toastIn .4s ease;min-width:260px;
+}
+.toast.show{display:flex;}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.toast-title{font-size:11px;color:var(--gold);letter-spacing:1px;}
+.toast-msg{font-size:11px;color:var(--mid);}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1100px){.rsidebar{display:none;}}
+@media(max-width:780px){
+  .lsidebar{display:none;}
+  .feed-main{max-width:100%;border-right:none;}
+  .post-card,.create-post{margin-left:16px;margin-right:16px;}
+  .stories-bar,.filter-bar{padding-left:16px;padding-right:16px;}
+  .feed-header{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="curRing"></div>
+
+<div class="app-wrap">
+
+  <!-- ====== LEFT SIDEBAR ====== -->
+  <aside class="lsidebar">
+    <div class="brand">
+      <div class="brand-logo">LUMYN</div>
+      <div class="brand-tag">COMMUNITY</div>
+    </div>
+    <div class="profile-mini">
+      <div class="pm-ava">S</div>
+      <div class="pm-info">
+        <div class="pm-name">Sarah M.</div>
+        <div class="pm-role">◆ Customer</div>
+        <div class="pm-badge">Order #LMN-2025-004821</div>
+      </div>
+    </div>
+    <nav class="snav">
+      <div class="snav-label">Feed</div>
+      <div class="snav-item active"><span class="ni">◈</span> Community Feed <span class="nbadge teal">12</span></div>
+      <div class="snav-item" onclick="toast('Loading your Following feed...')"><span class="ni">◉</span> Following</div>
+      <div class="snav-item" onclick="toast('Opening showcases gallery...')"><span class="ni">◇</span> Showcases</div>
+      <div class="snav-item" onclick="toast('Loading industry news...')"><span class="ni">◎</span> Industry News</div>
+      <div class="snav-label">Explore</div>
+      <div class="snav-item" onclick="toast('Trending diamonds this week...')"><span class="ni">💎</span> Trending Stones</div>
+      <div class="snav-item" onclick="toast('Loading designer spotlights...')"><span class="ni">🎨</span> Designer Spotlights</div>
+      <div class="snav-item" onclick="toast('Certified natural diamond news...')"><span class="ni">🌱</span> Ethical Sourcing</div>
+      <div class="snav-label">My Space</div>
+      <div class="snav-item" onclick="toast('Opening your profile...')"><span class="ni">👤</span> My Profile</div>
+      <div class="snav-item" onclick="toast('Saved posts loading...')"><span class="ni">♡</span> Saved Posts</div>
+      <div class="snav-item" onclick="toast('Notifications panel...')"><span class="ni">🔔</span> Notifications <span class="nbadge">5</span></div>
+    </nav>
+    <div class="trend-box">
+      <div class="trend-title">◆ Trending Tags</div>
+      <span class="trend-tag">#CertifiedNatural</span>
+      <span class="trend-tag">#ArtDeco</span>
+      <span class="trend-tag">#EthicalDiamond</span>
+      <span class="trend-tag">#RoseGold</span>
+      <span class="trend-tag">#PearCut</span>
+      <span class="trend-tag">#AntwerpExchange</span>
+      <span class="trend-tag">#BespokeJewellery</span>
+    </div>
+  </aside>
+
+  <!-- ====== MAIN FEED ====== -->
+  <main class="feed-main">
+
+    <!-- Feed header tabs -->
+    <div class="feed-header">
+      <div class="feed-tabs">
+        <div class="feed-tab active" onclick="switchTab(this,'all')">◆ All Posts</div>
+        <div class="feed-tab" onclick="switchTab(this,'designers')">Designers</div>
+        <div class="feed-tab" onclick="switchTab(this,'dealers')">Dealers</div>
+        <div class="feed-tab" onclick="switchTab(this,'news')">Industry News</div>
+        <div class="feed-tab" onclick="switchTab(this,'customers')">Customers</div>
+      </div>
+    </div>
+
+    <!-- Stories bar -->
+    <div class="stories-bar">
+      <div class="story-item" onclick="toast('Add your story to the LUMYN feed!')">
+        <div class="story-ring"><div class="story-inner story-add">＋</div></div>
+        <div class="story-name">Add Story</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Anna Voss story...')">
+        <div class="story-ring"><div class="story-inner">👩</div></div>
+        <div class="story-name">Anna V.</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Priya Mehta story...')">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--rose),var(--gold))"><div class="story-inner">👩‍🎨</div></div>
+        <div class="story-name">Priya M.</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Diamond Elite story...')">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--teal),var(--blue))"><div class="story-inner">💎</div></div>
+        <div class="story-name">D. Elite</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Jean-Marc story...')">
+        <div class="story-ring" style="background:linear-gradient(135deg,#9b7ebd,var(--rose))"><div class="story-inner">🧑‍🎨</div></div>
+        <div class="story-name">J-M Dupont</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Botswana Gems story...')">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--gold),#a0522d)"><div class="story-inner">🏭</div></div>
+        <div class="story-name">BW Gems</div>
+      </div>
+      <div class="story-item" onclick="toast('Viewing Marcus story...')">
+        <div class="story-ring" style="background:linear-gradient(135deg,var(--blue),var(--teal))"><div class="story-inner">👨</div></div>
+        <div class="story-name">Marcus T.</div>
+      </div>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">All</button>
+      <button class="filter-chip" onclick="filterChip(this)">💍 New Designs</button>
+      <button class="filter-chip" onclick="filterChip(this)">💎 Stones for Sale</button>
+      <button class="filter-chip" onclick="filterChip(this)">📰 Industry News</button>
+      <button class="filter-chip" onclick="filterChip(this)">◆ Certified Natural</button>
+      <button class="filter-chip" onclick="filterChip(this)">✨ Customer Reviews</button>
+      <button class="filter-chip" onclick="filterChip(this)">🔥 Trending</button>
+    </div>
+
+    <!-- CREATE POST -->
+    <div class="create-post" id="createPost">
+      <div class="cp-top">
+        <div class="cp-ava">S</div>
+        <textarea class="cp-input" id="postInput" placeholder="Share a design, thought, news or showcase your work with the LUMYN community..." onkeydown="handlePostKey(event)"></textarea>
+      </div>
+      <div class="upload-preview" id="uploadPreview"></div>
+      <div class="cp-bar">
+        <div class="cp-actions">
+          <button class="cp-action" onclick="addImagePlaceholder()"><span class="ca-icon">🖼️</span> Photo</button>
+          <button class="cp-action" onclick="addImagePlaceholder('video')"><span class="ca-icon">🎬</span> Video</button>
+          <button class="cp-action" onclick="toast('Tag a designer, dealer or product in your post')"><span class="ca-icon">◈</span> Tag</button>
+          <button class="cp-action" onclick="toast('Choose post visibility: Public / Followers / Verified Only')"><span class="ca-icon">◎</span> Visibility</button>
+        </div>
+        <button class="post-btn" onclick="submitPost()">Post ◆</button>
+      </div>
+    </div>
+
+    <!-- ====== POSTS ====== -->
+    <div id="postsContainer">
+
+    <!-- POST 1: Designer Showcase -->
+    <div class="post-card" data-cat="designers">
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:var(--rose-dim);border-color:rgba(232,180,184,.3)">👩</div>
+          <div class="post-meta">
+            <div class="post-author">
+              <span class="post-author-name">Anna Voss</span>
+              <span class="role-badge rb-designer">◆ Designer</span>
+            </div>
+            <div class="post-location">📍 Antwerp, Belgium · <span class="live-dot"></span> Just now</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-showcase">✦ New Showcase</span>
+      <div class="post-body">
+        <div class="post-text">
+          Just completed this <em>Art Deco Halo engagement ring</em> — 18K rose gold, 1.0ct pear-cut D/VS1, milgrain chevron shoulders. Took 14 days of hand-crafting at my Antwerp studio. Incredibly proud of how the milgrain detail turned out 💍<br><br>
+          GIA certified stone from our trusted partner <a href="#">@DiamondEliteTrading</a>. Currently listed on LUMYN — DM me for custom commissions. <a href="#">#ArtDeco</a> <a href="#">#RoseGold</a> <a href="#">#BespokeJewellery</a>
+        </div>
+      </div>
+      <div class="post-mosaic mosaic-3">
+        <div class="mosaic-img m-main"><img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&q=80" alt="Ring closeup" onerror="this.style.display='none';this.parentElement.style.background='var(--panel2)';this.parentElement.innerHTML+='<div style=\'display:flex;align-items:center;justify-content:center;height:320px;font-size:60px\'>💍</div>'"></div>
+        <div class="mosaic-img"><img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80" alt="Detail shot" onerror="this.style.display='none';this.parentElement.style.background='var(--panel2)';this.parentElement.innerHTML+='<div style=\'display:flex;align-items:center;justify-content:center;height:160px;font-size:40px\'>✨</div>'"></div>
+        <div class="mosaic-img"><img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&q=80" alt="In box" onerror="this.style.display='none';this.parentElement.style.background='var(--panel2)';this.parentElement.innerHTML+='<div style=\'display:flex;align-items:center;justify-content:center;height:160px;font-size:40px\'>📦</div>'"></div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💎</span><span id="rc1">284</span></div>
+          <div class="rc-item"><span class="rc-emoji">🔥</span><span>91</span></div>
+          <div class="rc-item"><span class="rc-emoji">😍</span><span>67</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 43 comments</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">12 shares</div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" id="reactBtn1" onclick="toggleReact(this,'rc1')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc1','💎',this.closest('.post-card'))">💎</span>
+              <span class="react-opt" onclick="pickReact(event,'rc1','🔥',this.closest('.post-card'))">🔥</span>
+              <span class="react-opt" onclick="pickReact(event,'rc1','😍',this.closest('.post-card'))">😍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc1','💍',this.closest('.post-card'))">💍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc1','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc1','👑',this.closest('.post-card'))">👑</span>
+            </div>
+            <span class="pa-icon">💎</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap">
+          <div class="ci-ava">S</div>
+          <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+          <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+        </div>
+        <div class="comments-list">
+          <div class="comment">
+            <div class="c-ava" style="background:var(--gold-dim);border-color:var(--gold-border)">💎</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Diamond Elite Trading</span><span class="role-badge rb-dealer" style="font-size:7px">Dealer</span><span class="c-time">2m ago</span></div>
+              <div class="c-text">Stunning work as always, Anna! The GIA stone really shines in that halo setting 🙌 Honoured to supply stones for your pieces.</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ Like</button>
+                <button class="c-act" onclick="toast('Reply feature — tag @' + this.closest('.comment').querySelector('.c-name').textContent)">Reply</button>
+              </div>
+            </div>
+          </div>
+          <div class="comment">
+            <div class="c-ava" style="background:var(--blue-dim);border-color:var(--blue)">👨</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Marcus T.</span><span class="role-badge rb-customer" style="font-size:7px">Customer</span><span class="c-time">5m ago</span></div>
+              <div class="c-text">This is literally exactly what I want for my proposal! How do I start a commission on LUMYN? The chevron detail is perfection 😭</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ Like</button>
+                <button class="c-act" onclick="toast('Reply sent to Marcus T. — opening DM thread...')">Reply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="view-more-comments" onclick="toast('Loading all 43 comments...')">View all 43 comments</button>
+      </div>
+    </div>
+
+    <!-- POST 2: Dealer - Diamond Listing -->
+    <div class="post-card" data-cat="dealers">
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:var(--gold-dim);border-color:var(--gold-border)">💎</div>
+          <div class="post-meta">
+            <div class="post-author">
+              <span class="post-author-name">Diamond Elite Trading</span>
+              <span class="role-badge rb-dealer">◆ Dealer</span>
+            </div>
+            <div class="post-location">📍 Antwerp Diamond Exchange · 18m ago</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-update">💎 New Listing</span>
+      <div class="post-body">
+        <div class="post-text">
+          🚨 Rare stone just arrived at our exchange. <em>2.4ct Oval Fancy Vivid Yellow Diamond</em> — natural colour, VS2 clarity, GIA certified. These vivid yellows are exceptionally rare and this one is a stunner. Only available on LUMYN to verified designers and direct buyers.
+        </div>
+      </div>
+      <div class="diamond-listing-card">
+        <div class="dlc-gem">💛</div>
+        <div class="dlc-info">
+          <div class="dlc-name">Fancy Vivid Yellow — Oval 2.4ct</div>
+          <div class="dlc-specs">
+            <span class="dlc-spec">Oval Cut</span>
+            <span class="dlc-spec">VS2 Clarity</span>
+            <span class="dlc-spec">Fancy Vivid Yellow</span>
+            <span class="dlc-spec">GIA #3024891</span>
+            <span class="dlc-spec">Natural</span>
+          </div>
+          <div class="dlc-price">$24,500 — Available Now</div>
+        </div>
+        <button class="dlc-cta" onclick="toast('Opening enquiry with Diamond Elite Trading...')">Enquire ◆</button>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💎</span><span id="rc2">156</span></div>
+          <div class="rc-item"><span class="rc-emoji">🔥</span><span>48</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 19 comments</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">28 shares</div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" onclick="toggleReact(this,'rc2')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc2','💎',this.closest('.post-card'))">💎</span>
+              <span class="react-opt" onclick="pickReact(event,'rc2','🔥',this.closest('.post-card'))">🔥</span>
+              <span class="react-opt" onclick="pickReact(event,'rc2','😍',this.closest('.post-card'))">😍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc2','💛',this.closest('.post-card'))">💛</span>
+              <span class="react-opt" onclick="pickReact(event,'rc2','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc2','👑',this.closest('.post-card'))">👑</span>
+            </div>
+            <span class="pa-icon">💎</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap">
+          <div class="ci-ava">S</div>
+          <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+          <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+        </div>
+        <div class="comments-list">
+          <div class="comment">
+            <div class="c-ava" style="background:var(--rose-dim);border-color:rgba(232,180,184,.3)">👩</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Anna Voss</span><span class="role-badge rb-designer" style="font-size:7px">Designer</span><span class="c-time">12m ago</span></div>
+              <div class="c-text">That vivid yellow is absolutely incredible! I have a client looking for exactly this. Sending you a DM right now.</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ 12 Likes</button>
+                <button class="c-act" onclick="toast('Replying to Anna Voss...')">Reply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="view-more-comments" onclick="toast('Loading all 19 comments...')">View all 19 comments</button>
+      </div>
+    </div>
+
+    <!-- POST 3: Industry News -->
+    <div class="post-card" data-cat="news">
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:var(--blue-dim);border-color:var(--blue)">📰</div>
+          <div class="post-meta">
+            <div class="post-author">
+              <span class="post-author-name">LUMYN News Desk</span>
+              <span class="role-badge" style="color:var(--blue);border-color:var(--blue);background:var(--blue-dim)">◆ News</span>
+            </div>
+            <div class="post-location">🌍 Industry Update · 1h ago</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-news">📰 Industry News</span>
+      <div class="post-body">
+        <div class="post-text">The Antwerp Diamond Exchange reports record demand for natural diamonds in 2025 — here's what it means for designers, dealers and customers.</div>
+      </div>
+      <div class="news-card">
+        <div class="news-img">💡<img src="https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=600&q=80" alt="Lab diamonds" onerror="this.remove()"></div>
+        <div class="news-body">
+          <div class="news-source">◆ LUMYN INDUSTRY REPORT · 2025</div>
+          <div class="news-headline">Natural Diamonds Hit Record Demand in 2025 — Authenticity Is the New Luxury</div>
+          <div class="news-excerpt">With provenance and traceability now at the forefront, customers are paying premium prices for certified natural diamonds. The Antwerp and Dubai exchanges report record transactions...</div>
+        </div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💡</span><span id="rc3">312</span></div>
+          <div class="rc-item"><span class="rc-emoji">🔥</span><span>201</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 88 comments</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">114 shares</div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" onclick="toggleReact(this,'rc3')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc3','💡',this.closest('.post-card'))">💡</span>
+              <span class="react-opt" onclick="pickReact(event,'rc3','🔥',this.closest('.post-card'))">🔥</span>
+              <span class="react-opt" onclick="pickReact(event,'rc3','😮',this.closest('.post-card'))">😮</span>
+              <span class="react-opt" onclick="pickReact(event,'rc3','🌱',this.closest('.post-card'))">🌱</span>
+              <span class="react-opt" onclick="pickReact(event,'rc3','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc3','👑',this.closest('.post-card'))">👑</span>
+            </div>
+            <span class="pa-icon">💡</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap">
+          <div class="ci-ava">S</div>
+          <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+          <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+        </div>
+        <div class="comments-list">
+          <div class="comment">
+            <div class="c-ava" style="background:var(--teal-dim);border-color:var(--teal)">🏭</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Botswana Gems Ltd.</span><span class="role-badge rb-manufacturer" style="font-size:7px">Manufacturer</span><span class="c-time">45m ago</span></div>
+              <div class="c-text">As a manufacturer, we've doubled capacity for natural diamond cutting and polishing. Provenance-traced Botswana stones are in extremely high demand globally.</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ 34 Likes</button>
+                <button class="c-act" onclick="toast('Replying to Botswana Gems Ltd...')">Reply</button>
+              </div>
+            </div>
+          </div>
+          <div class="comment">
+            <div class="c-ava" style="background:var(--gold-dim);border-color:var(--gold-border)">💎</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Diamond Elite Trading</span><span class="role-badge rb-dealer" style="font-size:7px">Dealer</span><span class="c-time">1h ago</span></div>
+              <div class="c-text">Natural certified diamonds hold and grow in value. Our GIA-graded stones come with full provenance documentation — from mine to market, every step verified.</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ 21 Likes</button>
+                <button class="c-act" onclick="toast('Replying...')">Reply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="view-more-comments" onclick="toast('Loading all 88 comments...')">View all 88 comments</button>
+      </div>
+    </div>
+
+    <!-- POST 4: Customer Review & Unboxing -->
+    <div class="post-card" data-cat="customers">
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:var(--blue-dim);border-color:var(--blue)">👨</div>
+          <div class="post-meta">
+            <div class="post-author">
+              <span class="post-author-name">Marcus T.</span>
+              <span class="role-badge rb-customer">◆ Customer</span>
+            </div>
+            <div class="post-location">📍 London, UK · 3h ago</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-insight">⭐ Verified Review</span>
+      <div class="post-body">
+        <div class="post-text">
+          SHE SAID YES 🥹💍 Just proposed with this incredible ring I ordered through LUMYN. <em>Anna Voss</em> is an absolute genius — the craftsmanship blew us both away. The entire experience from AI chat to delivery was unlike anything. 21 days from brief to hand. <a href="#">@AnnaVoss</a> thank you from the bottom of my heart. <a href="#">#LUMYN</a> <a href="#">#ShesSaidYes</a> <a href="#">#BespokeJewellery</a>
+        </div>
+      </div>
+      <div class="post-mosaic mosaic-2">
+        <div class="mosaic-img" style="height:260px"><img src="https://images.unsplash.com/photo-1583939411023-14783179e581?w=500&q=80" alt="Proposal" style="height:260px" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:260px;font-size:60px\'>💍</div>'"></div>
+        <div class="mosaic-img" style="height:260px"><img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=500&q=80" alt="Ring detail" style="height:260px" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:260px;font-size:60px\'>✨</div>'"></div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💎</span><span id="rc4">1.2k</span></div>
+          <div class="rc-item"><span class="rc-emoji">🥹</span><span>847</span></div>
+          <div class="rc-item"><span class="rc-emoji">💍</span><span>634</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 241 comments</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">89 shares</div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" onclick="toggleReact(this,'rc4')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc4','💎',this.closest('.post-card'))">💎</span>
+              <span class="react-opt" onclick="pickReact(event,'rc4','🥹',this.closest('.post-card'))">🥹</span>
+              <span class="react-opt" onclick="pickReact(event,'rc4','💍',this.closest('.post-card'))">💍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc4','❤',this.closest('.post-card'))">❤</span>
+              <span class="react-opt" onclick="pickReact(event,'rc4','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc4','🔥',this.closest('.post-card'))">🔥</span>
+            </div>
+            <span class="pa-icon">💎</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap">
+          <div class="ci-ava">S</div>
+          <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+          <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+        </div>
+        <div class="comments-list">
+          <div class="comment">
+            <div class="c-ava" style="background:var(--rose-dim);border-color:rgba(232,180,184,.3)">👩</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Anna Voss</span><span class="role-badge rb-designer" style="font-size:7px">Designer</span><span class="c-time">2h ago</span></div>
+              <div class="c-text">CONGRATULATIONS MARCUS!!! 🥹💍 This is why I do what I do. Wishing you both a lifetime of happiness. Thank you for trusting me with something so precious 🙏</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ 287 Likes</button>
+                <button class="c-act" onclick="toast('Replying...')">Reply</button>
+              </div>
+            </div>
+          </div>
+          <div class="comment">
+            <div class="c-ava" style="background:var(--blue-dim);border-color:var(--blue)">👩‍🦰</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Lerato K.</span><span class="role-badge rb-customer" style="font-size:7px">Customer</span><span class="c-time">3h ago</span></div>
+              <div class="c-text">This is everything!! I'm ordering from LUMYN for my anniversary now. Do you know roughly how long the custom process takes from start to finish?</div>
+              <div class="c-actions">
+                <button class="c-act" onclick="likeComment(this)">❤ Like</button>
+                <button class="c-act" onclick="toast('Replying...')">Reply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="view-more-comments" onclick="toast('Loading all 241 comments...')">View all 241 comments</button>
+      </div>
+    </div>
+
+    <!-- POST 5: Manufacturer Update -->
+    <div class="post-card" data-cat="manufacturers">
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:var(--teal-dim);border-color:var(--teal)">🏭</div>
+          <div class="post-meta">
+            <div class="post-author">
+              <span class="post-author-name">Botswana Gems Ltd.</span>
+              <span class="role-badge rb-manufacturer">◆ Manufacturer</span>
+            </div>
+            <div class="post-location">📍 Gaborone, Botswana · 5h ago</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-insight">🏭 Studio Update</span>
+      <div class="post-body">
+        <div class="post-text">
+          Proud to share that <em>Botswana Gems Ltd.</em> is now fully operational on LUMYN as a verified manufacturer. We offer diamond cutting, polishing, and bespoke casting services for designers on the platform.<br><br>
+          We are now accepting orders from LUMYN designers directly. Our cutting floor just upgraded to the latest Sarine DiaExpert technology for precision analysis. Message us for capacity and pricing. <a href="#">#BotswanaDiamonds</a> <a href="#">#AfricanGems</a> <a href="#">#LUMYNManufacturer</a>
+        </div>
+      </div>
+      <div class="post-img">
+        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=700&q=80" alt="Workshop" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\'background:var(--panel2);height:280px;display:flex;align-items:center;justify-content:center;font-size:80px\'>🏭</div>'">
+        <div class="post-img-caption">◆ Diamond cutting & polishing floor · Gaborone, Botswana</div>
+      </div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💎</span><span id="rc5">203</span></div>
+          <div class="rc-item"><span class="rc-emoji">👏</span><span>178</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 31 comments</span></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">42 shares</div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" onclick="toggleReact(this,'rc5')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc5','💎',this.closest('.post-card'))">💎</span>
+              <span class="react-opt" onclick="pickReact(event,'rc5','👏',this.closest('.post-card'))">👏</span>
+              <span class="react-opt" onclick="pickReact(event,'rc5','🔥',this.closest('.post-card'))">🔥</span>
+              <span class="react-opt" onclick="pickReact(event,'rc5','🌍',this.closest('.post-card'))">🌍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc5','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc5','💡',this.closest('.post-card'))">💡</span>
+            </div>
+            <span class="pa-icon">💎</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap">
+          <div class="ci-ava">S</div>
+          <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+          <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+        </div>
+        <div class="comments-list">
+          <div class="comment">
+            <div class="c-ava" style="background:var(--rose-dim)">👩</div>
+            <div class="c-body">
+              <div class="c-head"><span class="c-name">Anna Voss</span><span class="role-badge rb-designer" style="font-size:7px">Designer</span><span class="c-time">4h ago</span></div>
+              <div class="c-text">This is a huge deal for African manufacturing! I'll be reaching out for partnership. So great to have Botswana represented on LUMYN 🙌</div>
+              <div class="c-actions"><button class="c-act" onclick="likeComment(this)">❤ Like</button><button class="c-act" onclick="toast('Replying...')">Reply</button></div>
+            </div>
+          </div>
+        </div>
+        <button class="view-more-comments" onclick="toast('Loading all 31 comments...')">View all 31 comments</button>
+      </div>
+    </div>
+
+    </div><!-- end postsContainer -->
+
+    <!-- Load more -->
+    <div style="text-align:center;padding:32px;border-top:1px solid var(--border);">
+      <button onclick="loadMore()" style="background:transparent;border:1px solid var(--border);color:var(--mid);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:14px 36px;cursor:none;transition:all .3s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--mid)'">Load More Posts ◆</button>
+    </div>
+  </main>
+
+  <!-- ====== RIGHT SIDEBAR ====== -->
+  <aside class="rsidebar">
+
+    <div class="rs-widget">
+      <div class="rs-title">◆ Community Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="sb-num">4.2k</div><div class="sb-label">Designers</div></div>
+        <div class="stat-box"><div class="sb-num">1.8k</div><div class="sb-label">Dealers</div></div>
+        <div class="stat-box"><div class="sb-num">312</div><div class="sb-label">Manufacturers</div></div>
+        <div class="stat-box"><div class="sb-num">89k</div><div class="sb-label">Customers</div></div>
+      </div>
+    </div>
+
+    <div class="rs-widget">
+      <div class="rs-title">◆ Live Activity</div>
+      <div class="ticker-items" id="tickerItems">
+        <div class="ticker-item">
+          <div class="ti-dot gold"></div>
+          <div>
+            <div class="ti-text"><strong>Priya Mehta</strong> just completed a custom sapphire piece</div>
+            <div class="ti-time">Just now</div>
+          </div>
+        </div>
+        <div class="ticker-item">
+          <div class="ti-dot teal"></div>
+          <div>
+            <div class="ti-text"><strong>Diamond Elite</strong> listed a 3.1ct oval D/IF stone</div>
+            <div class="ti-time">2m ago</div>
+          </div>
+        </div>
+        <div class="ticker-item">
+          <div class="ti-dot rose"></div>
+          <div>
+            <div class="ti-text"><strong>Lerato K.</strong> left a ★★★★★ review for Jean-Marc</div>
+            <div class="ti-time">5m ago</div>
+          </div>
+        </div>
+        <div class="ticker-item">
+          <div class="ti-dot gold"></div>
+          <div>
+            <div class="ti-text"><strong>BW Gems</strong> started production on order #LMN-2025-004901</div>
+            <div class="ti-time">8m ago</div>
+          </div>
+        </div>
+        <div class="ticker-item">
+          <div class="ti-dot teal"></div>
+          <div>
+            <div class="ti-text"><strong>Sarah M.</strong> (you) started a chat with Anna Voss</div>
+            <div class="ti-time">15m ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rs-widget">
+      <div class="rs-title">◆ Suggested to Follow</div>
+      <div class="follow-list">
+        <div class="follow-item">
+          <div class="fi-ava" style="background:var(--rose-dim)">👩‍🎨</div>
+          <div class="fi-info">
+            <div class="fi-name">Priya Mehta</div>
+            <div class="fi-role">Designer · Jaipur, India · ★4.8</div>
+          </div>
+          <button class="fi-follow" onclick="followUser(this)">+ Follow</button>
+        </div>
+        <div class="follow-item">
+          <div class="fi-ava" style="background:rgba(155,126,189,.15)">🧑‍🎨</div>
+          <div class="fi-info">
+            <div class="fi-name">Jean-Marc Dupont</div>
+            <div class="fi-role">Designer · Paris, France · ★4.7</div>
+          </div>
+          <button class="fi-follow" onclick="followUser(this)">+ Follow</button>
+        </div>
+        <div class="follow-item">
+          <div class="fi-ava" style="background:var(--teal-dim)">🏭</div>
+          <div class="fi-info">
+            <div class="fi-name">Botswana Gems Ltd.</div>
+            <div class="fi-role">Manufacturer · Gaborone · Verified</div>
+          </div>
+          <button class="fi-follow" onclick="followUser(this)">+ Follow</button>
+        </div>
+        <div class="follow-item">
+          <div class="fi-ava" style="background:var(--gold-dim)">💎</div>
+          <div class="fi-info">
+            <div class="fi-name">Cape Town Diamonds</div>
+            <div class="fi-role">Dealer · Cape Town, SA · ★4.9</div>
+          </div>
+          <button class="fi-follow" onclick="followUser(this)">+ Follow</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rs-widget">
+      <div class="rs-title">◆ Trending Now</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#CertifiedNatural</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#PearCut</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#ArtDeco</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#EthicalDiamonds</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#RoseGold</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#BotswanaDiamonds</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#ShesSaidYes</span>
+        <span class="trend-tag" style="cursor:none;font-size:10px;">#AntwerpExchange</span>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toastEl">
+  <div class="toast-title">◆ LUMYN</div>
+  <div class="toast-msg" id="toastMsg">Action completed</div>
+</div>
+
+<script>
+// === CURSOR ===
+const cur=document.getElementById('cur'),ring=document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx-4}px,${my-4}px)`;});
+(function a(){rx+=(mx-rx-15)*.12;ry+=(my-ry-15)*.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(a);})();
+document.querySelectorAll('button,input,textarea,.trend-tag,.follow-item,.ticker-item,.story-item,.react-opt,.news-card,.diamond-listing-card,.filter-chip,.feed-tab').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='48px';ring.style.height='48px';ring.style.opacity='.9';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='30px';ring.style.height='30px';ring.style.opacity='.5';});
+});
+
+// === TOAST ===
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toastEl');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// === TABS ===
+function switchTab(el,cat){
+  document.querySelectorAll('.feed-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(cat==='all'){document.querySelectorAll('.post-card').forEach(p=>p.style.display='');return;}
+  document.querySelectorAll('.post-card').forEach(p=>{
+    const d=p.dataset.cat;
+    p.style.display=(d===cat||d===undefined)?'':'none';
+  });
+  toast(`Showing ${el.textContent.trim()} posts`);
+}
+
+// === FILTER CHIPS ===
+function filterChip(el){
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  toast('Filtered: '+el.textContent.trim());
+}
+
+// === REACTIONS ===
+function toggleReact(btn,rcId){
+  btn.classList.toggle('reacted');
+  const span=document.getElementById(rcId);
+  if(!span)return;
+  let n=span.textContent;
+  const isK=n.includes('k');
+  if(isK){let v=parseFloat(n)*1000;v=btn.classList.contains('reacted')?v+1:v-1;span.textContent=v>=1000?(v/1000).toFixed(1)+'k':v;}
+  else{let v=parseInt(n)||0;v=btn.classList.contains('reacted')?v+1:v-1;span.textContent=v;}
+}
+function pickReact(e,rcId,emoji,card){
+  e.stopPropagation();
+  const span=document.getElementById(rcId);
+  if(!span)return;
+  let n=parseInt(span.textContent)||0;
+  span.textContent=n+1;
+  // Find parent react btn
+  const btn=e.target.closest('.post-actions')?.querySelector('.pa-btn');
+  if(btn){btn.classList.add('reacted');btn.querySelector('.pa-icon').textContent=emoji;}
+  toast('You reacted with '+emoji);
+}
+
+// === COMMENTS ===
+function toggleComments(btn){
+  const card=btn.closest('.post-card');
+  const section=card.querySelector('.comments-section');
+  const isOpen=section.classList.contains('open');
+  section.classList.toggle('open',!isOpen);
+  if(!isOpen){
+    const inp=section.querySelector('.ci-input');
+    setTimeout(()=>inp?.focus(),100);
+  }
+}
+function addComment(e,inp){
+  if(e.key==='Enter'){e.preventDefault();submitComment(inp);}
+}
+function addCommentFromBtn(btn){
+  const inp=btn.parentElement.querySelector('.ci-input');
+  submitComment(inp);
+}
+function submitComment(inp){
+  const txt=inp.value.trim();if(!txt)return;
+  const list=inp.closest('.comments-section').querySelector('.comments-list');
+  const t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  const el=document.createElement('div');
+  el.className='comment';
+  el.innerHTML=`<div class="c-ava" style="background:var(--gold);color:var(--obsidian)">S</div><div class="c-body"><div class="c-head"><span class="c-name">Sarah M.</span><span class="role-badge rb-customer" style="font-size:7px">Customer</span><span class="c-time">${t}</span></div><div class="c-text">${txt}</div><div class="c-actions"><button class="c-act" onclick="likeComment(this)">❤ Like</button><button class="c-act" onclick="toast('Reply feature coming...')">Reply</button></div></div>`;
+  list.prepend(el);
+  inp.value='';
+  toast('Comment posted! ◆');
+  addLiveTicker('You commented on a post');
+}
+function likeComment(btn){
+  btn.classList.toggle('liked-c');
+  const txt=btn.textContent.replace(/[^0-9]/g,'');
+  let n=parseInt(txt)||0;
+  n=btn.classList.contains('liked-c')?n+1:Math.max(0,n-1);
+  btn.textContent=btn.classList.contains('liked-c')?`❤ ${n} Likes`:`❤ Like`;
+}
+
+// === CREATE POST ===
+let imgCount=0;
+const imagePlaceholders=['💍','💎','✨','🌟','👑','💛','🔮'];
+function addImagePlaceholder(type){
+  const prev=document.getElementById('uploadPreview');
+  prev.classList.add('show');
+  const item=document.createElement('div');
+  item.className='up-item';
+  const emoji=imagePlaceholders[imgCount%imagePlaceholders.length]; imgCount++;
+  item.innerHTML=`<div class="up-img" style="display:flex;align-items:center;justify-content:center;background:var(--panel2);font-size:32px">${emoji}</div><div class="up-remove" onclick="this.parentElement.remove();if(!document.querySelectorAll('#uploadPreview .up-item').length)document.getElementById('uploadPreview').classList.remove('show')">✕</div>`;
+  prev.appendChild(item);
+  toast(type==='video'?'Video placeholder added — tap to upload':'Photo added — tap to upload or drag in your image');
+}
+function handlePostKey(e){if(e.key==='Enter'&&e.ctrlKey){submitPost();}}
+function submitPost(){
+  const inp=document.getElementById('postInput');
+  const txt=inp.value.trim();
+  if(!txt){toast('Write something to post!');return;}
+  const container=document.getElementById('postsContainer');
+  const t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  const previews=document.querySelectorAll('#uploadPreview .up-item');
+  let imageHtml='';
+  if(previews.length>0){
+    imageHtml=`<div class="post-mosaic mosaic-2">`;
+    previews.forEach(p=>{
+      const em=p.querySelector('.up-img').textContent;
+      imageHtml+=`<div class="mosaic-img"><div style="height:180px;display:flex;align-items:center;justify-content:center;background:var(--panel2);font-size:56px">${em}</div></div>`;
+    });
+    imageHtml+=`</div>`;
+  }
+  const rcId='rc_new_'+Date.now();
+  const newPost=document.createElement('div');
+  newPost.className='post-card';
+  newPost.dataset.cat='customers';
+  newPost.innerHTML=`
+    <div class="post-head">
+      <div class="ph-left">
+        <div class="post-ava" style="background:var(--gold);color:var(--obsidian)">S</div>
+        <div class="post-meta">
+          <div class="post-author"><span class="post-author-name">Sarah M.</span><span class="role-badge rb-customer">◆ Customer</span></div>
+          <div class="post-location">📍 Gaborone, Botswana · ${t}</div>
+        </div>
+      </div>
+      <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+    </div>
+    <span class="post-type-strip pt-update">◆ New Post</span>
+    <div class="post-body"><div class="post-text">${txt}</div></div>
+    ${imageHtml}
+    <div class="post-reactions">
+      <div class="reaction-counts">
+        <div class="rc-item"><span class="rc-emoji">💎</span><span id="${rcId}">0</span></div>
+        <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 0 comments</span></div>
+      </div>
+    </div>
+    <div class="post-actions">
+      <div style="position:relative;flex:1">
+        <button class="pa-btn" onclick="toggleReact(this,'${rcId}')">
+          <div class="reaction-picker">
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','💎',this.closest('.post-card'))">💎</span>
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','🔥',this.closest('.post-card'))">🔥</span>
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','😍',this.closest('.post-card'))">😍</span>
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','💍',this.closest('.post-card'))">💍</span>
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','✨',this.closest('.post-card'))">✨</span>
+            <span class="react-opt" onclick="pickReact(event,'${rcId}','👑',this.closest('.post-card'))">👑</span>
+          </div>
+          <span class="pa-icon">💎</span> React
+        </button>
+      </div>
+      <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+      <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+      <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+    </div>
+    <div class="comments-section">
+      <div class="comment-input-wrap">
+        <div class="ci-ava">S</div>
+        <input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)">
+        <button class="ci-send" onclick="addCommentFromBtn(this)">➤</button>
+      </div>
+      <div class="comments-list"></div>
+    </div>`;
+  container.prepend(newPost);
+  inp.value='';
+  document.getElementById('uploadPreview').classList.remove('show');
+  document.getElementById('uploadPreview').innerHTML='';
+  imgCount=0;
+  toast('Your post is live on the LUMYN feed! ◆');
+  addLiveTicker('Sarah M. just posted to the community');
+  newPost.scrollIntoView({behavior:'smooth',block:'start'});
+  // re-attach cursor listeners
+  newPost.querySelectorAll('button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ring.style.width='48px';ring.style.height='48px';ring.style.opacity='.9';});
+    el.addEventListener('mouseleave',()=>{ring.style.width='30px';ring.style.height='30px';ring.style.opacity='.5';});
+  });
+}
+
+// === SHARE & SAVE ===
+function sharePost(btn){
+  btn.classList.toggle('reacted');
+  toast(btn.classList.contains('reacted')?'Post shared to your followers! ◆':'Unshared post');
+}
+function savePost(btn){
+  btn.classList.toggle('reacted');
+  btn.querySelector('.pa-icon').textContent=btn.classList.contains('reacted')?'♥':'♡';
+  toast(btn.classList.contains('reacted')?'Saved to your collection ♥':'Removed from saved posts');
+}
+
+// === POST MENU ===
+function showPostMenu(btn){
+  toast('Post options: Save · Hide · Report · Share via link · Follow author');
+}
+
+// === FOLLOW ===
+function followUser(btn){
+  const isFollowing=btn.textContent.includes('Following');
+  btn.textContent=isFollowing?'+ Follow':'✓ Following';
+  btn.classList.toggle('following',!isFollowing);
+  toast(isFollowing?'Unfollowed user':'Now following! You\'ll see their posts in your feed.');
+}
+
+// === LIVE TICKER ===
+const tickerMsgs=[
+  {dot:'gold',text:'<strong>Anna Voss</strong> posted a new showcase ring',time:'Just now'},
+  {dot:'teal',text:'<strong>New stone</strong> listed — 1.8ct Princess Cut G/VS1',time:'1m ago'},
+  {dot:'rose',text:'<strong>James O.</strong> placed a new custom order',time:'3m ago'},
+  {dot:'gold',text:'<strong>Priya Mehta</strong> completed order #LMN-2025-004799',time:'7m ago'},
+];
+function addLiveTicker(msg){
+  const t=document.getElementById('tickerItems');
+  const item=document.createElement('div');
+  item.className='ticker-item';
+  item.style.animation='fadeUp .4s ease';
+  item.innerHTML=`<div class="ti-dot teal"></div><div><div class="ti-text">${msg}</div><div class="ti-time">Just now</div></div>`;
+  t.prepend(item);
+  if(t.children.length>6)t.lastChild.remove();
+}
+// Rotate ticker automatically
+let ti=0;
+setInterval(()=>{
+  const m=tickerMsgs[ti%tickerMsgs.length]; ti++;
+  const t=document.getElementById('tickerItems');
+  const item=document.createElement('div');
+  item.className='ticker-item';
+  item.innerHTML=`<div class="ti-dot ${m.dot}"></div><div><div class="ti-text">${m.text}</div><div class="ti-time">${m.time}</div></div>`;
+  t.prepend(item);
+  if(t.children.length>6)t.lastChild.remove();
+},6000);
+
+// === LOAD MORE ===
+function loadMore(){
+  toast('Loading more posts from your network...');
+  const container=document.getElementById('postsContainer');
+  setTimeout(()=>{
+    const p=document.createElement('div');
+    p.className='post-card';
+    p.dataset.cat='designers';
+    p.innerHTML=`
+      <div class="post-head">
+        <div class="ph-left">
+          <div class="post-ava" style="background:rgba(155,126,189,.15);border:1px solid rgba(155,126,189,.3)">🧑‍🎨</div>
+          <div class="post-meta">
+            <div class="post-author"><span class="post-author-name">Jean-Marc Dupont</span><span class="role-badge rb-designer">◆ Designer</span></div>
+            <div class="post-location">📍 Paris, France · 8h ago</div>
+          </div>
+        </div>
+        <button class="post-menu" onclick="showPostMenu(this)">⋯</button>
+      </div>
+      <span class="post-type-strip pt-showcase">✦ New Showcase</span>
+      <div class="post-body">
+        <div class="post-text">My latest <em>Art Nouveau collar necklace</em> — 18K yellow gold, 47 individual diamonds, pavé set in organic vine motifs. 6 weeks of hand-work. Inspired by Lalique. Now available for private sale via LUMYN. <a href="#">#ArtNouveau</a> <a href="#">#HauteCouture</a> <a href="#">#DiamondNecklace</a></div>
+      </div>
+      <div class="post-img" style="background:var(--panel2);height:260px;display:flex;align-items:center;justify-content:center;font-size:80px;margin:0 20px 16px;border:1px solid var(--border)">📿</div>
+      <div class="post-reactions">
+        <div class="reaction-counts">
+          <div class="rc-item"><span class="rc-emoji">💎</span><span id="rc_jm">421</span></div>
+          <div class="rc-item"><span class="rc-emoji">👑</span><span>312</span></div>
+          <div class="rc-item"><span style="color:var(--muted);font-size:11px">· 67 comments</span></div>
+        </div>
+      </div>
+      <div class="post-actions">
+        <div style="position:relative;flex:1">
+          <button class="pa-btn" onclick="toggleReact(this,'rc_jm')">
+            <div class="reaction-picker">
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','💎',this.closest('.post-card'))">💎</span>
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','👑',this.closest('.post-card'))">👑</span>
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','😍',this.closest('.post-card'))">😍</span>
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','✨',this.closest('.post-card'))">✨</span>
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','🔥',this.closest('.post-card'))">🔥</span>
+              <span class="react-opt" onclick="pickReact(event,'rc_jm','💡',this.closest('.post-card'))">💡</span>
+            </div>
+            <span class="pa-icon">💎</span> React
+          </button>
+        </div>
+        <button class="pa-btn" onclick="toggleComments(this)"><span class="pa-icon">💬</span> Comment</button>
+        <button class="pa-btn" onclick="sharePost(this)"><span class="pa-icon">↗</span> Share</button>
+        <button class="pa-btn" onclick="savePost(this)"><span class="pa-icon">♡</span> Save</button>
+      </div>
+      <div class="comments-section">
+        <div class="comment-input-wrap"><div class="ci-ava">S</div><input class="ci-input" placeholder="Write a comment..." onkeydown="addComment(event,this)"><button class="ci-send" onclick="addCommentFromBtn(this)">➤</button></div>
+        <div class="comments-list"></div>
+        <button class="view-more-comments" onclick="toast('Loading all 67 comments...')">View all 67 comments</button>
+      </div>`;
+    container.appendChild(p);
+    p.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('3 new posts loaded ◆');
+  },800);
+}
+</script>
+</body>
+</html>

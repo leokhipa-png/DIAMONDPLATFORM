@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMYN — The Diamond Revolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --obsidian: #0a0a0a;
+    --void: #080808;
+    --diamond-white: #f0ede8;
+    --ice: #d8f0ff;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --rose: #e8c4b8;
+    --teal: #00d4aa;
+    --text-muted: #888;
+    --glass: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--obsidian);
+    color: var(--diamond-white);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.18s ease, width 0.2s, height 0.2s;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 24px 60px;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+    backdrop-filter: blur(2px);
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: var(--gold);
+  }
+  .logo span { color: var(--diamond-white); }
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 10px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: none;
+    transition: all 0.3s;
+  }
+  .nav-cta:hover { background: var(--gold); color: var(--obsidian); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 50%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,212,170,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 30% at 50% 20%, rgba(216,240,255,0.03) 0%, transparent 50%);
+  }
+  .diamond-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 24px;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(64px, 9vw, 140px);
+    font-weight: 300;
+    line-height: 0.9;
+    margin-bottom: 32px;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-title .outline {
+    -webkit-text-stroke: 1px var(--diamond-white);
+    color: transparent;
+  }
+  .hero-sub {
+    max-width: 520px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+  .hero-ctas {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    animation: fadeUp 1s ease 0.8s both;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--obsidian);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: none;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.2);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--diamond-white);
+    padding: 16px 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: none;
+    transition: all 0.3s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    position: absolute; right: 60px; bottom: 80px;
+    display: flex; flex-direction: column; gap: 32px;
+    animation: fadeLeft 1s ease 1s both;
+  }
+  .stat { text-align: right; }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  /* FLOATING DIAMOND */
+  .diamond-float {
+    position: absolute;
+    right: 15%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 300px;
+    height: 300px;
+    animation: float 6s ease-in-out infinite, fadeIn 1.5s ease 0.5s both;
+    pointer-events: none;
+  }
+  .diamond-float svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.3)) drop-shadow(0 0 80px rgba(216,240,255,0.1));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(-50%) rotate(0deg); }
+    50% { transform: translateY(calc(-50% - 20px)) rotate(5deg); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* HOW IT WORKS */
+  .section { padding: 120px 60px; }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 64px;
+  }
+
+  /* AI CHAT DEMO */
+  .ai-demo {
+    background: var(--void);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .ai-demo-header {
+    background: rgba(201,168,76,0.05);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ai-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .ai-demo-title {
+    font-size: 11px; letter-spacing: 2px; color: var(--gold);
+    text-transform: uppercase; margin-left: 8px;
+  }
+  .ai-messages { padding: 32px 24px; display: flex; flex-direction: column; gap: 24px; }
+  .msg { display: flex; gap: 16px; }
+  .msg-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .msg-user .msg-avatar { background: var(--gold); color: var(--obsidian); font-weight: bold; }
+  .msg-ai .msg-avatar { background: rgba(0,212,170,0.15); border: 1px solid var(--teal); color: var(--teal); font-size: 16px; }
+  .msg-content { flex: 1; }
+  .msg-name { font-size: 10px; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+  .msg-text {
+    font-size: 13px; line-height: 1.8;
+    color: var(--diamond-white);
+    background: var(--glass);
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 8px;
+  }
+  .msg-user .msg-text { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.2); border-radius: 8px 0 8px 8px; }
+  .design-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 12px;
+  }
+  .design-card {
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .design-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .design-card.selected { border-color: var(--teal); background: rgba(0,212,170,0.05); }
+  .design-card .design-visual {
+    font-size: 40px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center;
+    height: 70px;
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(216,240,255,0.05));
+  }
+  .design-card .design-name { font-size: 11px; letter-spacing: 1px; color: var(--gold); }
+  .design-card .design-desc { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .selected-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--teal); color: var(--obsidian);
+    font-size: 9px; padding: 2px 6px; letter-spacing: 1px;
+  }
+
+  .ai-input {
+    border-top: 1px solid var(--border);
+    padding: 20px 24px;
+    display: flex; gap: 12px;
+  }
+  .ai-input input {
+    flex: 1;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: var(--diamond-white);
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .ai-input input:focus { border-color: var(--gold); }
+  .ai-input input::placeholder { color: var(--text-muted); }
+  .send-btn {
+    background: var(--gold);
+    border: none;
+    color: var(--obsidian);
+    padding: 12px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: none;
+  }
+
+  /* ECOSYSTEM FLOW */
+  .flow-section {
+    background: var(--void);
+    padding: 120px 60px;
+  }
+  .flow-nodes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .flow-node {
+    text-align: center;
+    padding: 32px 16px;
+    position: relative;
+    z-index: 2;
+  }
+  .flow-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    margin: 0 auto 16px;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+    position: relative;
+  }
+  .flow-node:hover .flow-icon {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    transform: scale(1.1);
+  }
+  .flow-node-title { font-size: 12px; letter-spacing: 1px; color: var(--gold); margin-bottom: 8px; text-transform: uppercase; }
+  .flow-node-desc { font-size: 10px; color: var(--text-muted); line-height: 1.6; }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 24px; opacity: 0.4;
+  }
+
+  /* FEATURES GRID */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 64px;
+  }
+  .feature-card {
+    background: var(--void);
+    padding: 48px 36px;
+    transition: background 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: rgba(201,168,76,0.03); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 60px;
+    font-weight: 300;
+    color: rgba(201,168,76,0.1);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .feature-icon { font-size: 28px; margin-bottom: 16px; }
+  .feature-title { font-size: 13px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+  .feature-desc { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+
+  /* TRUST / VERIFICATION */
+  .trust-section { padding: 120px 60px; position: relative; }
+  .trust-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center; max-width: 1100px; margin: 0 auto;
+  }
+  .verification-card {
+    background: var(--void);
+    border: 1px solid var(--border);
+    padding: 40px;
+  }
+  .verification-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 300;
+    color: var(--gold); margin-bottom: 32px;
+  }
+  .verify-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-bottom: 24px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .verify-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .verify-check {
+    width: 32px; height: 32px;
+    border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    background: rgba(0,212,170,0.1);
+    border: 1px solid var(--teal);
+    color: var(--teal);
+  }
+  .verify-info strong { display: block; font-size: 12px; letter-spacing: 1px; color: var(--diamond-white); margin-bottom: 4px; text-transform: uppercase; }
+  .verify-info span { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+
+  /* PRICING */
+  .pricing-section { padding: 120px 60px; background: var(--void); }
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border);
+    max-width: 1000px; margin: 64px auto 0;
+  }
+  .pricing-card {
+    background: var(--obsidian);
+    padding: 48px 36px;
+    position: relative;
+  }
+  .pricing-card.featured { background: rgba(201,168,76,0.05); }
+  .pricing-badge {
+    position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: var(--obsidian);
+    font-size: 9px; padding: 4px 16px; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .pricing-plan { font-size: 11px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
+  .pricing-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px; font-weight: 300; color: var(--gold);
+    line-height: 1; margin-bottom: 4px;
+  }
+  .pricing-price span { font-size: 18px; }
+  .pricing-period { font-size: 11px; color: var(--text-muted); margin-bottom: 32px; }
+  .pricing-features { list-style: none; margin-bottom: 36px; }
+  .pricing-features li {
+    font-size: 12px; color: var(--text-muted); padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pricing-features li::before { content: '◆'; color: var(--gold); font-size: 8px; flex-shrink: 0; }
+  .pricing-features li.active { color: var(--diamond-white); }
+
+  /* PIPELINE TRACKER */
+  .tracker-section { padding: 120px 60px; }
+  .tracker {
+    max-width: 900px; margin: 64px auto 0;
+    border: 1px solid var(--border);
+    background: var(--void);
+    overflow: hidden;
+  }
+  .tracker-header {
+    background: rgba(201,168,76,0.05);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tracker-id { font-size: 11px; letter-spacing: 2px; color: var(--gold); }
+  .tracker-status {
+    background: rgba(0,212,170,0.1); border: 1px solid var(--teal);
+    color: var(--teal); font-size: 9px; letter-spacing: 2px;
+    padding: 4px 12px; text-transform: uppercase;
+  }
+  .tracker-steps { padding: 32px; }
+  .track-step {
+    display: flex; gap: 24px; margin-bottom: 28px;
+    position: relative;
+  }
+  .track-step::after {
+    content: '';
+    position: absolute; left: 15px; top: 40px;
+    width: 1px; height: calc(100% + 4px);
+    background: var(--border);
+  }
+  .track-step:last-child::after { display: none; }
+  .track-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; z-index: 1; position: relative;
+  }
+  .track-dot.done { background: var(--teal); color: var(--obsidian); }
+  .track-dot.active { border: 2px solid var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+  .track-dot.pending { border: 1px solid var(--border); color: var(--text-muted); }
+  .track-info strong { display: block; font-size: 12px; letter-spacing: 1px; color: var(--diamond-white); margin-bottom: 2px; }
+  .track-info span { font-size: 11px; color: var(--text-muted); }
+  .track-info .track-time { font-size: 10px; color: var(--gold); margin-top: 4px; }
+
+  /* CTA SECTION */
+  .cta-section {
+    padding: 160px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+  }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 7vw, 100px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .cta-sub {
+    font-size: 14px; color: var(--text-muted);
+    max-width: 500px; margin: 0 auto 48px;
+    line-height: 1.8; position: relative;
+  }
+  .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 32px;
+  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 6px; color: var(--gold); }
+  .footer-links { display: flex; gap: 32px; }
+  .footer-links a { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-decoration: none; text-transform: uppercase; transition: color 0.3s; }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    background: rgba(201,168,76,0.02);
+  }
+  .marquee-track {
+    display: flex; gap: 60px;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-size: 11px; letter-spacing: 3px; color: var(--gold);
+    text-transform: uppercase; opacity: 0.6; flex-shrink: 0;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* GENERATION SECTION */
+  .gen-section { padding: 120px 60px; }
+  .gen-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 64px;
+  }
+  .gen-card {
+    border: 1px solid var(--border);
+    background: var(--void);
+    padding: 32px 24px;
+    position: relative; overflow: hidden;
+    transition: all 0.4s;
+  }
+  .gen-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+  .gen-card::before {
+    content: attr(data-num);
+    position: absolute; top: -20px; right: -10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 100px; font-weight: 300;
+    color: rgba(201,168,76,0.04);
+    line-height: 1; pointer-events: none;
+  }
+  .gen-emoji { font-size: 32px; margin-bottom: 16px; }
+  .gen-title { font-size: 13px; letter-spacing: 1px; color: var(--gold); margin-bottom: 8px; text-transform: uppercase; }
+  .gen-text { font-size: 11px; color: var(--text-muted); line-height: 1.8; }
+
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 0 24px; }
+    .hero-stats { display: none; }
+    .diamond-float { display: none; }
+    .section { padding: 80px 24px; }
+    .flow-section { padding: 80px 24px; }
+    .flow-nodes { grid-template-columns: 1fr; }
+    .flow-arrow { transform: rotate(90deg); }
+    .features-grid { grid-template-columns: 1fr; }
+    .gen-grid { grid-template-columns: 1fr 1fr; }
+    .trust-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .design-cards { grid-template-columns: 1fr; }
+    footer { flex-direction: column; padding: 40px 24px; }
+    .pricing-section { padding: 80px 24px; }
+    .tracker-section { padding: 80px 24px; }
+    .trust-section { padding: 80px 24px; }
+    .gen-section { padding: 80px 24px; }
+    .cta-section { padding: 100px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">LUM<span>YN</span></div>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#trust">Trust & Safety</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#track">Track Order</a></li>
+  </ul>
+  <button class="nav-cta">Join Waitlist</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="diamond-grid"></div>
+
+  <p class="hero-eyebrow">◆ The Diamond Industry Reimagined</p>
+  <h1 class="hero-title">
+    Tell Us<br>
+    What You<br>
+    <em>Desire</em>
+  </h1>
+  <p class="hero-sub">
+    The first AI-powered diamond marketplace that connects customers directly with verified designers, dealers, and manufacturers — cutting out every unnecessary middleman.
+  </p>
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">Start Creating</button>
+    <button class="btn-secondary" onclick="document.getElementById('trust').scrollIntoView({behavior:'smooth'})">For Designers & Dealers</button>
+  </div>
+
+  <div class="diamond-float">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="dg1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#f0ede8;stop-opacity:0.9"/>
+          <stop offset="50%" style="stop-color:#d8f0ff;stop-opacity:0.6"/>
+          <stop offset="100%" style="stop-color:#c9a84c;stop-opacity:0.8"/>
+        </linearGradient>
+        <linearGradient id="dg2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#c9a84c;stop-opacity:0.3"/>
+          <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.1"/>
+        </linearGradient>
+      </defs>
+      <!-- Diamond shape -->
+      <polygon points="100,20 170,80 100,180 30,80" fill="url(#dg1)" opacity="0.8"/>
+      <polygon points="100,20 170,80 100,80" fill="url(#dg2)" opacity="0.6"/>
+      <polygon points="100,20 30,80 100,80" fill="rgba(255,255,255,0.15)"/>
+      <polygon points="100,180 170,80 100,80" fill="rgba(0,0,0,0.2)"/>
+      <polygon points="100,180 30,80 100,80" fill="rgba(201,168,76,0.2)"/>
+      <!-- Facet lines -->
+      <line x1="100" y1="20" x2="100" y2="80" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+      <line x1="30" y1="80" x2="170" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+      <line x1="100" y1="20" x2="55" y2="80" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+      <line x1="100" y1="20" x2="145" y2="80" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+    </svg>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">0%</div>
+      <div class="stat-label">Unnecessary<br>Middlemen</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Design<br>Possibilities</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Verified<br>Designers</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">◆ Engagement Rings</span>
+    <span class="marquee-item">◆ Custom Pendants</span>
+    <span class="marquee-item">◆ Diamond Bracelets</span>
+    <span class="marquee-item">◆ Bespoke Necklaces</span>
+    <span class="marquee-item">◆ Wedding Bands</span>
+    <span class="marquee-item">◆ Statement Earrings</span>
+    <span class="marquee-item">◆ Art Deco Pieces</span>
+    <span class="marquee-item">◆ Certified Natural Diamonds</span>
+    <span class="marquee-item">◆ Ethical Sourcing</span>
+    <span class="marquee-item">◆ Certified Authentic</span>
+    <span class="marquee-item">◆ Engagement Rings</span>
+    <span class="marquee-item">◆ Custom Pendants</span>
+    <span class="marquee-item">◆ Diamond Bracelets</span>
+    <span class="marquee-item">◆ Bespoke Necklaces</span>
+    <span class="marquee-item">◆ Wedding Bands</span>
+    <span class="marquee-item">◆ Statement Earrings</span>
+    <span class="marquee-item">◆ Art Deco Pieces</span>
+    <span class="marquee-item">◆ Certified Natural Diamonds</span>
+    <span class="marquee-item">◆ Ethical Sourcing</span>
+    <span class="marquee-item">◆ Certified Authentic</span>
+  </div>
+</div>
+
+<!-- WHAT NEW GENERATION WANTS -->
+<section class="gen-section" id="gen">
+  <div class="section-label">◆ The New Generation</div>
+  <h2 class="section-title">What Today's Buyers<br><em style="color:var(--gold);">Actually Want</em></h2>
+  <div class="gen-grid">
+    <div class="gen-card" data-num="1">
+      <div class="gen-emoji">🌱</div>
+      <div class="gen-title">Ethical Diamonds</div>
+      <div class="gen-text">Conflict-free, GIA-certified, mine-to-finger traceable. Every stone on LUMYN is 100% natural and authenticated.</div>
+    </div>
+    <div class="gen-card" data-num="2">
+      <div class="gen-emoji">🎨</div>
+      <div class="gen-title">Full Customisation</div>
+      <div class="gen-text">Cookie-cutter rings are over. Customers want to describe and design exactly what they envision.</div>
+    </div>
+    <div class="gen-card" data-num="3">
+      <div class="gen-emoji">💬</div>
+      <div class="gen-title">Direct Designer Access</div>
+      <div class="gen-text">No more agents. Speak directly to the craftsperson making your piece, in real time.</div>
+    </div>
+    <div class="gen-card" data-num="4">
+      <div class="gen-emoji">📦</div>
+      <div class="gen-title">Full Transparency</div>
+      <div class="gen-text">End-to-end tracking from diamond mine to your door. Every step recorded, nothing hidden.</div>
+    </div>
+  </div>
+</section>
+
+<!-- AI DEMO -->
+<section class="section" id="how">
+  <div class="section-label">◆ AI-Powered Experience</div>
+  <h2 class="section-title">You Talk.<br><em style="color:var(--gold);">LUMYN Designs.</em></h2>
+
+  <div class="ai-demo">
+    <div class="ai-demo-header">
+      <div class="ai-dot" style="background:#ff5f57"></div>
+      <div class="ai-dot" style="background:#febc2e"></div>
+      <div class="ai-dot" style="background:#28c840"></div>
+      <span class="ai-demo-title">◆ LUMYN AI Design Studio</span>
+    </div>
+    <div class="ai-messages" id="chatMessages">
+      <div class="msg msg-user">
+        <div class="msg-avatar">Y</div>
+        <div class="msg-content">
+          <div class="msg-name">You</div>
+          <div class="msg-text">I want a diamond engagement ring for my fiancée. She loves vintage styles, something unique and romantic. Budget around $8,000. Pear-shaped diamond if possible.</div>
+        </div>
+      </div>
+      <div class="msg msg-ai">
+        <div class="msg-avatar">◆</div>
+        <div class="msg-content">
+          <div class="msg-name">LUMYN AI</div>
+          <div class="msg-text">
+            Beautiful choice. I've generated 3 exclusive designs based on your brief — all ethically sourced, pear-cut diamonds, vintage-inspired settings within your budget. 3 verified designers are available to start work immediately:
+            <div class="design-cards">
+              <div class="design-card selected" onclick="selectDesign(this, 'Art Nouveau Halo')">
+                <div class="selected-badge">SELECTED</div>
+                <div class="design-visual">💍</div>
+                <div class="design-name">Art Nouveau Halo</div>
+                <div class="design-desc">Milgrain filigree · 0.8ct pear · $7,400</div>
+              </div>
+              <div class="design-card" onclick="selectDesign(this, 'Victorian Solitaire')">
+                <div class="design-visual" style="font-size:36px">💎</div>
+                <div class="design-name">Victorian Solitaire</div>
+                <div class="design-desc">Rose gold band · 1ct pear · $7,900</div>
+              </div>
+              <div class="design-card" onclick="selectDesign(this, 'Edwardian Cluster')">
+                <div class="design-visual">✨</div>
+                <div class="design-name">Edwardian Cluster</div>
+                <div class="design-desc">Platinum setting · 0.9ct pear · $7,650</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="msg msg-ai" id="designerMsg" style="display:none">
+        <div class="msg-avatar">◆</div>
+        <div class="msg-content">
+          <div class="msg-name">LUMYN AI</div>
+          <div class="msg-text" id="designerMsgContent"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ai-input">
+      <input type="text" placeholder="Describe your dream jewellery, decor, or ask a question..." id="chatInput" onkeydown="handleChat(event)">
+      <button class="send-btn" onclick="sendChat()">SEND ◆</button>
+    </div>
+  </div>
+</section>
+
+<!-- ECOSYSTEM FLOW -->
+<section class="flow-section">
+  <div class="section-label" style="text-align:center">◆ The LUMYN Ecosystem</div>
+  <h2 class="section-title" style="text-align:center">A New Chain.<br><em style="color:var(--gold);">No Broken Links.</em></h2>
+  <div class="flow-nodes">
+    <div class="flow-node">
+      <div class="flow-icon">🧑‍💼</div>
+      <div class="flow-node-title">Customer</div>
+      <div class="flow-node-desc">Describes vision via AI chat or picks from store</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-icon">🎨</div>
+      <div class="flow-node-title">Designer</div>
+      <div class="flow-node-desc">Verified craftsperson speaks directly with customer</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-icon">💎</div>
+      <div class="flow-node-title">Dealer</div>
+      <div class="flow-node-desc">Certified stone dealer sources the perfect diamond</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-icon">🏭</div>
+      <div class="flow-node-title">Manufacturer</div>
+      <div class="flow-node-desc">Artisan workshop crafts your piece to specification</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-icon">📦</div>
+      <div class="flow-node-title">Delivery</div>
+      <div class="flow-node-desc">Tracked, insured, international shipping to your door</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="section-label">◆ Platform Features</div>
+  <h2 class="section-title">Everything In<br><em style="color:var(--gold);">One Place</em></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">AI Design Agent</div>
+      <div class="feature-desc">Describe your vision in plain language. Our AI generates multiple custom designs instantly, matching your style, budget, and occasion.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">💬</div>
+      <div class="feature-title">Live Designer Chat</div>
+      <div class="feature-desc">Speak directly with verified designers inside the platform. All conversations are recorded for security and dispute resolution.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">🏪</div>
+      <div class="feature-title">Designer Store</div>
+      <div class="feature-desc">Browse authentic, verified portfolios. Designers upload real pieces they've made with certificates. No stock photos allowed.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">04</div>
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">Verified Identity</div>
+      <div class="feature-desc">All professionals submit business certificates, ID/passport, and location before listing. Regular re-verification keeps the platform clean.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">05</div>
+      <div class="feature-icon">💳</div>
+      <div class="feature-title">Global Payments</div>
+      <div class="feature-desc">International and local payment accounts built in. Secure escrow holds funds until delivery is confirmed — no risk to buyer or seller.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">06</div>
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Full Data Trail</div>
+      <div class="feature-desc">Every purchase, delivery, and review is recorded and stored. Customer feedback directly improves designer and dealer ratings.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">07</div>
+      <div class="feature-icon">🚚</div>
+      <div class="feature-title">Tracked Delivery</div>
+      <div class="feature-desc">Real-time shipping updates from workshop to your door. Insured international delivery with signature confirmation required.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">08</div>
+      <div class="feature-icon">⭐</div>
+      <div class="feature-title">Customer Feedback Hub</div>
+      <div class="feature-desc">A dedicated feedback chart tracks your experience from first message to final delivery. Reviews are public, verified, and immutable.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">09</div>
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Decor & Beyond</div>
+      <div class="feature-desc">Not just jewellery — diamond-studded home décor, watches, accessories. If diamonds are in it, LUMYN can source and design it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST & VERIFICATION -->
+<section class="trust-section" id="trust">
+  <div class="trust-grid">
+    <div>
+      <div class="section-label">◆ Trust & Safety</div>
+      <h2 class="section-title">Everyone Is<br><em style="color:var(--gold);">Verified.</em></h2>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.9;margin-bottom:32px;">
+        For the first time in the diamond industry, every person in the chain — from designer to dealer to manufacturer — is independently verified before they can list, sell, or communicate with customers.
+      </p>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.9;">
+        All in-platform conversations are recorded and stored. Disputes are handled by our Trust team with full access to the complete communication trail.
+      </p>
+    </div>
+    <div class="verification-card">
+      <div class="verification-title">Verification Checklist</div>
+      <div class="verify-item">
+        <div class="verify-check">✓</div>
+        <div class="verify-info">
+          <strong>Business Certificate</strong>
+          <span>Official registration document from country of operation. Must be current and valid.</span>
+        </div>
+      </div>
+      <div class="verify-item">
+        <div class="verify-check">✓</div>
+        <div class="verify-info">
+          <strong>Identity Document</strong>
+          <span>Passport or national ID verified against business registration. No anonymous sellers.</span>
+        </div>
+      </div>
+      <div class="verify-item">
+        <div class="verify-check">✓</div>
+        <div class="verify-info">
+          <strong>Physical Address</strong>
+          <span>Workshop or studio address confirmed. GPS-verified for manufacturers.</span>
+        </div>
+      </div>
+      <div class="verify-item">
+        <div class="verify-check">✓</div>
+        <div class="verify-info">
+          <strong>Diamond Certificates</strong>
+          <span>GIA certification required for all stones listed on platform. No exceptions.</span>
+        </div>
+      </div>
+      <div class="verify-item">
+        <div class="verify-check">✓</div>
+        <div class="verify-info">
+          <strong>Portfolio Authentication</strong>
+          <span>All designer portfolio pieces must be original work. Third-party reviews conducted quarterly.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER TRACKER -->
+<section class="tracker-section" id="track">
+  <div class="section-label">◆ Order Tracking</div>
+  <h2 class="section-title">Transparent<br><em style="color:var(--gold);">Every Step</em></h2>
+  <div class="tracker">
+    <div class="tracker-header">
+      <span class="tracker-id">◆ ORDER #LMN-2024-004821</span>
+      <span class="tracker-status">In Production</span>
+    </div>
+    <div class="tracker-steps">
+      <div class="track-step">
+        <div class="track-dot done">✓</div>
+        <div class="track-info">
+          <strong>Order Placed & Payment Secured</strong>
+          <span>Escrow payment confirmed. Designer briefed and accepted the commission.</span>
+          <div class="track-time">Feb 15, 2025 · 09:42 AM</div>
+        </div>
+      </div>
+      <div class="track-step">
+        <div class="track-dot done">✓</div>
+        <div class="track-info">
+          <strong>Design Finalised</strong>
+          <span>Customer approved Art Nouveau Halo design. CAD files sent to workshop.</span>
+          <div class="track-time">Feb 17, 2025 · 02:15 PM</div>
+        </div>
+      </div>
+      <div class="track-step">
+        <div class="track-dot done">✓</div>
+        <div class="track-info">
+          <strong>Diamond Sourced & Certified</strong>
+          <span>0.82ct pear-cut, D/VS1. GIA Certificate #2467893014. Ethically sourced.</span>
+          <div class="track-time">Feb 19, 2025 · 11:00 AM</div>
+        </div>
+      </div>
+      <div class="track-step">
+        <div class="track-dot active">◆</div>
+        <div class="track-info">
+          <strong>In Production</strong>
+          <span>Goldsmith Anna Voss is hand-crafting your ring at her studio in Antwerp.</span>
+          <div class="track-time">Est. completion Feb 28, 2025</div>
+        </div>
+      </div>
+      <div class="track-step">
+        <div class="track-dot pending">○</div>
+        <div class="track-info">
+          <strong>Quality Control & Photography</strong>
+          <span>Professional photography of finished piece before dispatch.</span>
+          <div class="track-time">Pending</div>
+        </div>
+      </div>
+      <div class="track-step">
+        <div class="track-dot pending">○</div>
+        <div class="track-info">
+          <strong>Shipped & Delivered</strong>
+          <span>Insured international delivery with real-time tracking.</span>
+          <div class="track-time">Pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="section-label" style="text-align:center">◆ Membership Plans</div>
+  <h2 class="section-title" style="text-align:center">Join The<br><em style="color:var(--gold);">Revolution</em></h2>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-plan">Customer</div>
+      <div class="pricing-price"><span>$</span>0</div>
+      <div class="pricing-period">Free to browse & create</div>
+      <ul class="pricing-features">
+        <li class="active">Unlimited AI design chats</li>
+        <li class="active">Browse all designer portfolios</li>
+        <li class="active">Saved favourites & wishlists</li>
+        <li class="active">Verified designer contacts</li>
+        <li>Priority customer support</li>
+        <li>Exclusive launch access</li>
+      </ul>
+      <button class="btn-primary" style="width:100%">Create Account</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-badge">Most Popular</div>
+      <div class="pricing-plan">Designer / Dealer</div>
+      <div class="pricing-price"><span>$</span>49</div>
+      <div class="pricing-period">per month + one-time $199 joining fee</div>
+      <ul class="pricing-features">
+        <li class="active">Verified profile & badge</li>
+        <li class="active">Portfolio listing (unlimited pieces)</li>
+        <li class="active">Direct customer messaging</li>
+        <li class="active">Order management dashboard</li>
+        <li class="active">Payment processing (3.5% fee)</li>
+        <li class="active">Analytics & sales insights</li>
+      </ul>
+      <button class="btn-primary" style="width:100%">Apply Now</button>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-plan">Manufacturer / Supply</div>
+      <div class="pricing-price"><span>$</span>149</div>
+      <div class="pricing-period">per month + one-time $499 joining fee</div>
+      <ul class="pricing-features">
+        <li class="active">Verified manufacturer badge</li>
+        <li class="active">Bulk order management</li>
+        <li class="active">Supply chain integration</li>
+        <li class="active">Designer network access</li>
+        <li class="active">Priority listing placement</li>
+        <li class="active">Dedicated account manager</li>
+      </ul>
+      <button class="btn-primary" style="width:100%">Apply Now</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <p class="hero-eyebrow" style="position:relative">◆ Be First</p>
+  <h2 class="cta-title">The Future<br>of <em style="color:var(--gold);">Diamonds</em><br>Starts Here</h2>
+  <p class="cta-sub">Join thousands already on the waitlist. Designers, dealers, and customers are signing up every day. The revolution won't wait.</p>
+  <div class="cta-buttons">
+    <button class="btn-primary">Join The Waitlist</button>
+    <button class="btn-secondary">Apply as Designer</button>
+    <button class="btn-secondary">Apply as Dealer</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">LUMYN</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Trust & Safety</a>
+    <a href="#">Press</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 LUMYN. All rights reserved. ◆</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx - 5}px, ${my - 5}px)`;
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.transform = `translate(${rx}px, ${ry}px)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('button, a, input, .design-card, .gen-card, .feature-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.opacity = '0.8';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.opacity = '0.5';
+    });
+  });
+
+  // Design selection
+  function selectDesign(el, name) {
+    document.querySelectorAll('.design-card').forEach(c => {
+      c.classList.remove('selected');
+      const badge = c.querySelector('.selected-badge');
+      if (badge) badge.remove();
+    });
+    el.classList.add('selected');
+    const badge = document.createElement('div');
+    badge.className = 'selected-badge';
+    badge.textContent = 'SELECTED';
+    el.prepend(badge);
+
+    const msg = document.getElementById('designerMsg');
+    const content = document.getElementById('designerMsgContent');
+    content.innerHTML = `
+      Excellent choice — <strong style="color:var(--gold)">${name}</strong> is one of our most requested styles. Here are 3 verified designers who specialise in this aesthetic and are available to start immediately:<br><br>
+      <strong style="color:var(--teal)">◆ Anna Voss</strong> · Antwerp, Belgium · 4.9★ (312 reviews) · Avg delivery 21 days<br>
+      <strong style="color:var(--teal)">◆ Priya Mehta</strong> · Jaipur, India · 4.8★ (198 reviews) · Avg delivery 28 days<br>
+      <strong style="color:var(--teal)">◆ Jean-Marc Dupont</strong> · Paris, France · 4.9★ (441 reviews) · Avg delivery 35 days<br><br>
+      Click any designer to open a private chat room where you can discuss your piece in detail.
+    `;
+    msg.style.display = 'flex';
+    msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Chat functionality
+  const responses = [
+    "Beautiful! I'm generating 4 design concepts based on your description. Give me a moment...",
+    "I love that vision. Here are 3 verified designers specialising in exactly that style. Would you like to connect with any of them directly?",
+    "Great question. All diamonds on LUMYN are 100% natural and GIA certified. Prices start from $1,200 per carat. Would you like me to filter by cut, carat or origin?",
+    "I've noted your preferences. For a vintage emerald-cut with a halo setting, I'd recommend looking at our Art Deco collection. Shall I show you some pieces?",
+    "Your budget works perfectly for a stunning natural diamond piece. All stones on LUMYN are GIA certified and conflict-free. Shall I show designs in that range?"
+  ];
+  let rIdx = 0;
+
+  function sendChat() {
+    const input = document.getElementById('chatInput');
+    const val = input.value.trim();
+    if (!val) return;
+
+    const messages = document.getElementById('chatMessages');
+
+    const userMsg = document.createElement('div');
+    userMsg.className = 'msg msg-user';
+    userMsg.innerHTML = `
+      <div class="msg-avatar">Y</div>
+      <div class="msg-content">
+        <div class="msg-name">You</div>
+        <div class="msg-text">${val}</div>
+      </div>`;
+    messages.appendChild(userMsg);
+    input.value = '';
+
+    setTimeout(() => {
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'msg msg-ai';
+      aiMsg.innerHTML = `
+        <div class="msg-avatar">◆</div>
+        <div class="msg-content">
+          <div class="msg-name">LUMYN AI</div>
+          <div class="msg-text">${responses[rIdx % responses.length]}</div>
+        </div>`;
+      messages.appendChild(aiMsg);
+      rIdx++;
+      aiMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 900);
+
+    userMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function handleChat(e) {
+    if (e.key === 'Enter') sendChat();
+  }
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .gen-card, .verify-item, .track-step, .pricing-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

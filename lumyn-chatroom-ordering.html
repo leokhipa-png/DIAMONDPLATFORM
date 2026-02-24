@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMYN — Customer Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --obsidian: #0a0a0a;
+  --void: #080808;
+  --panel: #0f0f0f;
+  --panel2: #141414;
+  --diamond-white: #f0ede8;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim: rgba(201,168,76,0.12);
+  --teal: #00d4aa;
+  --teal-dim: rgba(0,212,170,0.1);
+  --rose: #e8b4b8;
+  --text-muted: #666;
+  --text-mid: #999;
+  --border: rgba(255,255,255,0.07);
+  --border-gold: rgba(201,168,76,0.25);
+  --glass: rgba(255,255,255,0.03);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; overflow:hidden; }
+body {
+  background: var(--obsidian);
+  color: var(--diamond-white);
+  font-family: 'DM Mono', monospace;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor { width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transition:transform 0.05s; }
+.cursor-ring { width:32px;height:32px;border:1px solid rgba(201,168,76,0.5);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transition:width 0.2s,height 0.2s,opacity 0.2s; }
+
+/* LAYOUT */
+.app { display:flex; height:100vh; overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px; flex-shrink: 0;
+  background: var(--void);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-logo {
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.logo-text { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:5px; color:var(--gold); }
+.logo-badge { background:var(--teal-dim); border:1px solid var(--teal); color:var(--teal); font-size:8px; padding:2px 7px; letter-spacing:1px; }
+
+.sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+.nav-section-label { font-size:9px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; padding:16px 24px 8px; }
+.nav-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 24px; cursor:none;
+  transition:all 0.2s; position:relative;
+  border-left:2px solid transparent;
+  font-size:11px; letter-spacing:1px; color:var(--text-mid);
+}
+.nav-item:hover { background:var(--glass); color:var(--diamond-white); border-left-color:var(--border-gold); }
+.nav-item.active { background:var(--gold-dim); color:var(--gold); border-left-color:var(--gold); }
+.nav-item .nav-icon { font-size:16px; width:20px; text-align:center; }
+.nav-item .nav-badge {
+  margin-left:auto; background:var(--gold); color:var(--obsidian);
+  font-size:9px; padding:2px 6px; font-weight:bold;
+}
+.nav-item .nav-badge.teal { background:var(--teal); }
+
+.sidebar-order {
+  padding:16px; border-top:1px solid var(--border);
+}
+.order-mini {
+  background:var(--gold-dim); border:1px solid var(--border-gold);
+  padding:14px; cursor:none;
+}
+.order-mini-label { font-size:9px; letter-spacing:2px; color:var(--gold); margin-bottom:6px; }
+.order-mini-id { font-size:12px; color:var(--diamond-white); margin-bottom:8px; }
+.mini-progress { height:3px; background:var(--border); position:relative; }
+.mini-progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--teal)); width:55%; transition:width 1s; }
+.mini-progress-label { font-size:9px; color:var(--text-muted); margin-top:6px; }
+
+/* MAIN CONTENT */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* TOP BAR */
+.topbar {
+  height:64px; flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px;
+  background:var(--void);
+}
+.topbar-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; }
+.topbar-title em { color:var(--gold); font-style:italic; }
+.topbar-actions { display:flex; gap:12px; align-items:center; }
+.topbar-btn {
+  background:transparent; border:1px solid var(--border);
+  color:var(--text-mid); padding:8px 18px;
+  font-family:'DM Mono',monospace; font-size:10px;
+  letter-spacing:1px; text-transform:uppercase; cursor:none;
+  transition:all 0.2s;
+}
+.topbar-btn:hover, .topbar-btn.active { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+.topbar-btn.primary { background:var(--gold); color:var(--obsidian); border-color:var(--gold); }
+.user-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--gold); color:var(--obsidian);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:bold; cursor:none;
+}
+
+/* SCREENS */
+.screen { display:none; flex:1; overflow:hidden; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* =================== SCREEN 1: AI DESIGN =================== */
+.design-screen { display:flex; flex:1; overflow:hidden; }
+.design-left {
+  flex:1; display:flex; flex-direction:column;
+  border-right:1px solid var(--border);
+  overflow:hidden;
+}
+.design-right {
+  width:360px; flex-shrink:0;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+/* AI Chat */
+.chat-area {
+  flex:1; overflow-y:auto; padding:24px;
+  display:flex; flex-direction:column; gap:20px;
+  scroll-behavior:smooth;
+}
+.chat-area::-webkit-scrollbar { width:4px; }
+.chat-area::-webkit-scrollbar-track { background:transparent; }
+.chat-area::-webkit-scrollbar-thumb { background:var(--border-gold); border-radius:2px; }
+
+.msg { display:flex; gap:12px; animation:msgIn 0.4s ease both; }
+@keyframes msgIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.msg-ava {
+  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+.msg.user .msg-ava { background:var(--gold); color:var(--obsidian); font-weight:bold; }
+.msg.ai .msg-ava { background:var(--teal-dim); border:1px solid var(--teal); color:var(--teal); }
+.msg.designer .msg-ava { background:rgba(232,176,184,0.15); border:1px solid var(--rose); color:var(--rose); }
+.msg-body { flex:1; }
+.msg-meta { font-size:9px; letter-spacing:1px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; }
+.msg-meta .time { color:var(--text-muted); font-size:9px; margin-left:8px; }
+.msg-bubble {
+  font-size:12px; line-height:1.9; color:var(--diamond-white);
+  background:var(--panel2); border:1px solid var(--border);
+  padding:14px 18px; border-radius:0 10px 10px 10px;
+  max-width:520px;
+}
+.msg.user .msg-bubble { background:var(--gold-dim); border-color:var(--border-gold); border-radius:10px 0 10px 10px; }
+.msg.designer .msg-bubble { border-color:rgba(232,176,184,0.2); border-radius:0 10px 10px 10px; }
+.msg-bubble strong { color:var(--gold); }
+.msg-bubble .teal { color:var(--teal); }
+
+/* Design options in chat */
+.design-options { display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+.design-opt {
+  border:1px solid var(--border); padding:14px;
+  cursor:none; transition:all 0.3s; flex:1; min-width:120px;
+  text-align:center; position:relative;
+}
+.design-opt:hover { border-color:var(--gold); background:var(--gold-dim); transform:translateY(-3px); }
+.design-opt.chosen { border-color:var(--teal); background:var(--teal-dim); }
+.design-opt .opt-gem { font-size:32px; margin-bottom:8px; }
+.design-opt .opt-name { font-size:11px; color:var(--gold); letter-spacing:1px; }
+.design-opt .opt-price { font-size:10px; color:var(--text-muted); margin-top:3px; }
+.design-opt .chosen-mark { position:absolute; top:6px; right:6px; background:var(--teal); color:var(--obsidian); font-size:8px; padding:2px 5px; }
+
+/* Designer cards in chat */
+.designer-cards { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.designer-card {
+  display:flex; align-items:center; gap:14px;
+  border:1px solid var(--border); padding:14px;
+  cursor:none; transition:all 0.3s;
+}
+.designer-card:hover { border-color:var(--gold); background:var(--gold-dim); }
+.designer-card.picked { border-color:var(--teal); background:var(--teal-dim); }
+.d-avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.d-info { flex:1; }
+.d-name { font-size:12px; color:var(--diamond-white); letter-spacing:1px; margin-bottom:3px; }
+.d-meta { font-size:10px; color:var(--text-muted); }
+.d-rating { color:var(--gold); }
+.d-btn {
+  background:transparent; border:1px solid var(--border-gold);
+  color:var(--gold); font-family:'DM Mono',monospace;
+  font-size:9px; letter-spacing:1px; text-transform:uppercase;
+  padding:6px 14px; cursor:none; transition:all 0.2s; flex-shrink:0;
+}
+.d-btn:hover, .d-btn.selected { background:var(--gold); color:var(--obsidian); }
+
+/* Typing indicator */
+.typing { display:flex; gap:5px; align-items:center; padding:8px 0; }
+.typing-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); animation:blink 1.2s infinite; }
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0.2}40%{opacity:1}}
+
+/* Chat input */
+.chat-input-bar {
+  border-top:1px solid var(--border);
+  padding:16px 24px;
+  display:flex; gap:10px; align-items:flex-end;
+  background:var(--void);
+}
+.chat-input-bar textarea {
+  flex:1; background:var(--panel2); border:1px solid var(--border);
+  color:var(--diamond-white); padding:12px 16px;
+  font-family:'DM Mono',monospace; font-size:12px;
+  resize:none; height:46px; outline:none;
+  transition:border-color 0.2s; line-height:1.5;
+}
+.chat-input-bar textarea:focus { border-color:var(--gold); }
+.chat-input-bar textarea::placeholder { color:var(--text-muted); }
+.send-btn {
+  background:var(--gold); border:none; color:var(--obsidian);
+  width:46px; height:46px; display:flex; align-items:center;
+  justify-content:center; font-size:18px; cursor:none;
+  transition:all 0.2s; flex-shrink:0;
+}
+.send-btn:hover { background:var(--gold-light); transform:scale(1.05); }
+.attach-btn {
+  background:var(--panel2); border:1px solid var(--border); color:var(--text-muted);
+  width:46px; height:46px; display:flex; align-items:center;
+  justify-content:center; font-size:18px; cursor:none;
+  transition:all 0.2s; flex-shrink:0;
+}
+.attach-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* Right panel: design details */
+.design-panel {
+  flex:1; overflow-y:auto; padding:24px;
+  display:flex; flex-direction:column; gap:20px;
+}
+.design-panel::-webkit-scrollbar { width:3px; }
+.design-panel::-webkit-scrollbar-thumb { background:var(--border-gold); }
+
+.panel-section { margin-bottom:4px; }
+.panel-label { font-size:9px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.summary-ring {
+  background:var(--gold-dim); border:1px solid var(--border-gold);
+  padding:20px; text-align:center; margin-bottom:16px;
+}
+.ring-visual { font-size:56px; margin-bottom:8px; }
+.ring-name { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--gold); }
+.ring-subtitle { font-size:10px; color:var(--text-muted); margin-top:4px; }
+
+.spec-list { display:flex; flex-direction:column; gap:0; }
+.spec-item {
+  display:flex; justify-content:space-between;
+  padding:9px 0; border-bottom:1px solid var(--border);
+  font-size:11px;
+}
+.spec-item:last-child { border-bottom:none; }
+.spec-key { color:var(--text-muted); }
+.spec-val { color:var(--diamond-white); }
+.spec-val.gold { color:var(--gold); }
+
+.quick-btns { display:flex; flex-direction:column; gap:8px; }
+.quick-btn {
+  background:transparent; border:1px solid var(--border);
+  color:var(--text-mid); padding:11px 16px;
+  font-family:'DM Mono',monospace; font-size:10px;
+  letter-spacing:1px; text-transform:uppercase; cursor:none;
+  transition:all 0.2s; text-align:left;
+  display:flex; align-items:center; gap:10px;
+}
+.quick-btn:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+.quick-btn.cta { background:var(--gold); color:var(--obsidian); border-color:var(--gold); }
+.quick-btn .qb-icon { font-size:16px; }
+
+/* =================== SCREEN 2: LIVE CHAT ROOM =================== */
+.chatroom-screen { display:flex; flex:1; overflow:hidden; }
+.rooms-list {
+  width:260px; flex-shrink:0;
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.rooms-header {
+  padding:20px 20px 12px;
+  border-bottom:1px solid var(--border);
+}
+.rooms-header h3 { font-size:11px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
+.rooms-header p { font-size:10px; color:var(--text-muted); }
+.rooms-scroll { flex:1; overflow-y:auto; }
+.room-item {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:14px 20px; cursor:none; transition:all 0.2s;
+  border-left:2px solid transparent;
+  border-bottom:1px solid var(--border);
+}
+.room-item:hover { background:var(--glass); }
+.room-item.active { background:var(--gold-dim); border-left-color:var(--gold); }
+.room-ava { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; border:1px solid var(--border); }
+.room-info { flex:1; min-width:0; }
+.room-name { font-size:12px; color:var(--diamond-white); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.room-preview { font-size:10px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.room-meta { text-align:right; flex-shrink:0; }
+.room-time { font-size:9px; color:var(--text-muted); margin-bottom:4px; }
+.room-unread { background:var(--teal); color:var(--obsidian); font-size:9px; padding:1px 6px; border-radius:10px; font-weight:bold; display:inline-block; }
+.room-role { font-size:8px; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-top:2px; }
+
+/* Live chat pane */
+.live-chat { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.live-chat-header {
+  padding:16px 24px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:16px;
+  background:var(--void);
+}
+.live-chat-ava { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; border:1px solid var(--border-gold); }
+.live-chat-info { flex:1; }
+.live-chat-name { font-size:14px; color:var(--diamond-white); letter-spacing:1px; }
+.live-chat-status { font-size:10px; color:var(--teal); margin-top:2px; display:flex; align-items:center; gap:6px; }
+.live-chat-status::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+.live-chat-actions { display:flex; gap:8px; }
+.icon-btn {
+  width:36px; height:36px; background:var(--panel2); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; cursor:none; transition:all 0.2s;
+}
+.icon-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* Security notice */
+.security-bar {
+  background:rgba(201,168,76,0.05); border-bottom:1px solid var(--border-gold);
+  padding:8px 24px; display:flex; align-items:center; gap:10px;
+  font-size:10px; color:var(--gold); letter-spacing:1px;
+}
+.security-bar span { color:var(--text-muted); }
+
+.live-messages {
+  flex:1; overflow-y:auto; padding:24px;
+  display:flex; flex-direction:column; gap:16px;
+}
+.live-messages::-webkit-scrollbar { width:3px; }
+.live-messages::-webkit-scrollbar-thumb { background:var(--border-gold); }
+
+.day-divider {
+  text-align:center; position:relative; margin:8px 0;
+}
+.day-divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border); }
+.day-divider span { background:var(--obsidian); position:relative; padding:0 16px; font-size:9px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; }
+
+.lmsg { display:flex; gap:10px; }
+.lmsg.self { flex-direction:row-reverse; }
+.lmsg-ava { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; border:1px solid var(--border); }
+.lmsg-content { max-width:65%; }
+.lmsg-name { font-size:9px; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px; }
+.lmsg.self .lmsg-name { text-align:right; }
+.lmsg-text {
+  font-size:12px; line-height:1.8; padding:12px 16px;
+  border:1px solid var(--border); background:var(--panel2);
+  border-radius:0 10px 10px 10px; color:var(--diamond-white);
+}
+.lmsg.self .lmsg-text { background:var(--gold-dim); border-color:var(--border-gold); border-radius:10px 0 10px 10px; }
+.lmsg-time { font-size:9px; color:var(--text-muted); margin-top:4px; }
+.lmsg.self .lmsg-time { text-align:right; }
+
+/* File/image share in chat */
+.lmsg-file {
+  border:1px solid var(--border-gold); padding:12px 16px;
+  display:flex; align-items:center; gap:12px;
+  font-size:11px; color:var(--gold); margin-top:6px;
+  cursor:none;
+}
+.lmsg-file .file-icon { font-size:20px; }
+.lmsg-file .file-info strong { display:block; color:var(--diamond-white); }
+.lmsg-file .file-size { font-size:9px; color:var(--text-muted); }
+
+/* Order confirmation in chat */
+.chat-order-card {
+  border:1px solid var(--border-gold); background:var(--gold-dim);
+  padding:16px; margin-top:8px;
+}
+.chat-order-title { font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
+.chat-order-detail { font-size:11px; color:var(--text-muted); line-height:1.8; }
+.chat-order-detail strong { color:var(--diamond-white); }
+
+/* Info sidebar for chat */
+.chat-info-panel {
+  width:260px; flex-shrink:0;
+  border-left:1px solid var(--border);
+  overflow-y:auto; padding:20px;
+  display:flex; flex-direction:column; gap:20px;
+}
+.info-section-title { font-size:9px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+.info-designer-card {
+  text-align:center; padding:20px 0;
+}
+.info-d-ava { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; border:1px solid var(--border-gold); margin:0 auto 12px; }
+.info-d-name { font-size:14px; color:var(--diamond-white); margin-bottom:4px; }
+.info-d-role { font-size:9px; letter-spacing:2px; color:var(--teal); text-transform:uppercase; }
+.info-d-rating { font-size:12px; color:var(--gold); margin-top:8px; }
+.info-badge { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--teal); color:var(--teal); font-size:9px; padding:3px 10px; letter-spacing:1px; margin-top:8px; }
+
+.shared-files { display:flex; flex-direction:column; gap:8px; }
+.shared-file {
+  display:flex; align-items:center; gap:10px;
+  padding:8px; border:1px solid var(--border);
+  font-size:10px; cursor:none; transition:all 0.2s;
+}
+.shared-file:hover { border-color:var(--gold); background:var(--gold-dim); }
+.shared-file .sf-icon { font-size:18px; }
+.shared-file .sf-name { flex:1; color:var(--text-mid); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.order-actions { display:flex; flex-direction:column; gap:8px; }
+
+/* =================== SCREEN 3: ORDERING FLOW =================== */
+.order-screen { flex:1; overflow-y:auto; padding:32px; }
+.order-screen::-webkit-scrollbar { width:4px; }
+.order-screen::-webkit-scrollbar-thumb { background:var(--border-gold); }
+
+/* Steps progress */
+.steps-bar {
+  display:flex; align-items:center; justify-content:center;
+  gap:0; margin-bottom:40px; position:relative;
+}
+.step-item { display:flex; align-items:center; flex:1; }
+.step-item:last-child { flex:0; }
+.step-circle {
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; flex-shrink:0; position:relative; z-index:2;
+  transition:all 0.3s;
+}
+.step-circle.done { background:var(--teal); color:var(--obsidian); border:2px solid var(--teal); }
+.step-circle.active { background:var(--gold-dim); border:2px solid var(--gold); color:var(--gold); }
+.step-circle.pending { background:var(--panel); border:1px solid var(--border); color:var(--text-muted); }
+.step-line { flex:1; height:1px; background:var(--border); position:relative; }
+.step-line.done { background:var(--teal); }
+.step-label { position:absolute; top:48px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:9px; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
+.step-circle.active + .step-label,
+.step-circle.done + .step-label { color:var(--gold); }
+.step-wrapper { display:flex; flex-direction:column; align-items:center; position:relative; }
+
+/* Order form panels */
+.order-panels { max-width:900px; margin:0 auto; }
+.order-panel { display:none; animation:slideIn 0.4s ease; }
+.order-panel.active { display:block; }
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+.order-section-header { margin-bottom:28px; }
+.order-section-eyebrow { font-size:9px; letter-spacing:3px; color:var(--teal); text-transform:uppercase; margin-bottom:6px; }
+.order-section-title { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:300; }
+.order-section-title em { color:var(--gold); font-style:italic; }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+.form-grid.triple { grid-template-columns:1fr 1fr 1fr; }
+.form-group { display:flex; flex-direction:column; gap:8px; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:10px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; }
+.form-input, .form-select, .form-textarea {
+  background:var(--panel2); border:1px solid var(--border);
+  color:var(--diamond-white); padding:12px 16px;
+  font-family:'DM Mono',monospace; font-size:12px;
+  outline:none; transition:border-color 0.2s; width:100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--gold); }
+.form-input::placeholder, .form-textarea::placeholder { color:var(--text-muted); }
+.form-select { cursor:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%23c9a84c'%3E%3Cpath d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; }
+.form-select option { background:var(--obsidian); }
+.form-textarea { resize:vertical; min-height:90px; }
+
+/* Selector cards */
+.selector-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+.sel-card {
+  border:1px solid var(--border); padding:20px; text-align:center;
+  cursor:none; transition:all 0.3s; position:relative;
+}
+.sel-card:hover { border-color:var(--gold-light); background:var(--gold-dim); transform:translateY(-2px); }
+.sel-card.selected { border-color:var(--gold); background:var(--gold-dim); }
+.sel-card .sel-icon { font-size:36px; margin-bottom:10px; }
+.sel-card .sel-name { font-size:11px; letter-spacing:1px; color:var(--gold); text-transform:uppercase; margin-bottom:4px; }
+.sel-card .sel-desc { font-size:10px; color:var(--text-muted); }
+.sel-card .sel-check { position:absolute; top:8px; right:8px; width:20px; height:20px; border-radius:50%; background:var(--gold); color:var(--obsidian); display:none; align-items:center; justify-content:center; font-size:10px; }
+.sel-card.selected .sel-check { display:flex; }
+
+/* Payment section */
+.payment-methods { display:flex; gap:10px; margin-bottom:20px; }
+.pay-method {
+  flex:1; border:1px solid var(--border); padding:14px;
+  text-align:center; cursor:none; transition:all 0.2s;
+}
+.pay-method:hover { border-color:var(--gold); }
+.pay-method.selected { border-color:var(--gold); background:var(--gold-dim); }
+.pay-method .pm-icon { font-size:24px; margin-bottom:6px; }
+.pay-method .pm-name { font-size:10px; letter-spacing:1px; color:var(--text-mid); text-transform:uppercase; }
+.pay-method.selected .pm-name { color:var(--gold); }
+
+.card-fields { display:grid; gap:12px; }
+.card-row { display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; }
+
+/* Order summary sidebar */
+.order-layout { display:flex; gap:32px; }
+.order-form-col { flex:1; }
+.order-summary-col { width:300px; flex-shrink:0; }
+.summary-card {
+  background:var(--void); border:1px solid var(--border);
+  padding:24px; position:sticky; top:0;
+}
+.summary-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--gold); margin-bottom:20px; }
+.summary-item {
+  display:flex; justify-content:space-between;
+  padding:10px 0; border-bottom:1px solid var(--border);
+  font-size:11px;
+}
+.summary-item:last-child { border-bottom:none; }
+.s-key { color:var(--text-muted); }
+.s-val { color:var(--diamond-white); }
+.s-val.gold { color:var(--gold); }
+.summary-total {
+  margin-top:16px; padding-top:16px;
+  border-top:1px solid var(--border-gold);
+  display:flex; justify-content:space-between; align-items:baseline;
+}
+.total-label { font-size:11px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; }
+.total-amount { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:300; color:var(--gold); }
+.escrow-note {
+  margin-top:14px; padding:12px; background:var(--teal-dim);
+  border:1px solid rgba(0,212,170,0.2); font-size:10px; color:var(--teal);
+  line-height:1.6;
+}
+.escrow-note strong { display:block; margin-bottom:4px; letter-spacing:1px; text-transform:uppercase; }
+
+/* Bottom nav */
+.order-nav-btns { display:flex; justify-content:space-between; align-items:center; margin-top:32px; padding-top:24px; border-top:1px solid var(--border); }
+.btn-back {
+  background:transparent; border:1px solid var(--border);
+  color:var(--text-muted); padding:12px 28px;
+  font-family:'DM Mono',monospace; font-size:11px;
+  letter-spacing:1px; text-transform:uppercase; cursor:none;
+  transition:all 0.2s;
+}
+.btn-back:hover { border-color:var(--gold); color:var(--gold); }
+.btn-next {
+  background:var(--gold); border:none; color:var(--obsidian);
+  padding:14px 36px; font-family:'DM Mono',monospace;
+  font-size:12px; letter-spacing:2px; text-transform:uppercase;
+  cursor:none; transition:all 0.2s; position:relative; overflow:hidden;
+}
+.btn-next:hover { background:var(--gold-light); }
+.btn-next.pulse { animation:goldPulse 2s infinite; }
+@keyframes goldPulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.4)} 50%{box-shadow:0 0 0 12px rgba(201,168,76,0)} }
+
+/* Confirmation screen */
+.confirm-screen { text-align:center; padding:60px 32px; }
+.confirm-diamond { font-size:80px; animation:dropIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275); }
+@keyframes dropIn { from{opacity:0;transform:scale(0.3) rotate(-20deg)} to{opacity:1;transform:scale(1) rotate(0)} }
+.confirm-title { font-family:'Cormorant Garamond',serif; font-size:56px; font-weight:300; margin:24px 0 12px; }
+.confirm-title em { color:var(--gold); }
+.confirm-sub { font-size:13px; color:var(--text-muted); line-height:1.9; max-width:500px; margin:0 auto 40px; }
+.confirm-id { display:inline-block; background:var(--gold-dim); border:1px solid var(--border-gold); padding:12px 32px; color:var(--gold); font-size:14px; letter-spacing:3px; margin-bottom:40px; }
+.confirm-steps { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; max-width:700px; margin:0 auto 40px; }
+.confirm-step { border:1px solid var(--border); padding:20px 12px; text-align:center; }
+.confirm-step .cs-icon { font-size:28px; margin-bottom:10px; }
+.confirm-step .cs-label { font-size:10px; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
+.confirm-step .cs-time { font-size:9px; color:var(--teal); margin-top:4px; }
+.confirm-btns { display:flex; gap:12px; justify-content:center; }
+
+/* =================== SCREEN 4: TRACKING =================== */
+.track-screen { flex:1; overflow-y:auto; padding:32px; }
+.track-screen::-webkit-scrollbar { width:4px; }
+.track-screen::-webkit-scrollbar-thumb { background:var(--border-gold); }
+.track-layout { display:flex; gap:32px; max-width:1100px; margin:0 auto; }
+.track-main { flex:1; }
+.track-side { width:300px; flex-shrink:0; }
+
+.track-header-card {
+  background:var(--void); border:1px solid var(--border-gold);
+  padding:24px; margin-bottom:24px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;
+}
+.track-order-id { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--gold); }
+.track-order-sub { font-size:10px; color:var(--text-muted); margin-top:4px; }
+.track-status-pill {
+  background:var(--teal-dim); border:1px solid var(--teal);
+  color:var(--teal); font-size:10px; padding:6px 20px; letter-spacing:2px; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+}
+.track-status-pill::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--teal); animation:pulse 2s infinite; }
+
+.track-progress-bar { margin-bottom:40px; }
+.tpb-labels { display:flex; justify-content:space-between; margin-bottom:12px; }
+.tpb-label { font-size:9px; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; }
+.tpb-label.active { color:var(--gold); }
+.tpb-bar { height:4px; background:var(--panel2); border-radius:2px; overflow:hidden; }
+.tpb-fill { height:100%; width:55%; background:linear-gradient(90deg,var(--teal),var(--gold)); border-radius:2px; transition:width 1.5s ease; }
+
+.timeline { display:flex; flex-direction:column; gap:0; }
+.tl-event { display:flex; gap:20px; padding-bottom:32px; position:relative; }
+.tl-event::before { content:''; position:absolute; left:19px; top:40px; bottom:0; width:1px; background:var(--border); }
+.tl-event:last-child::before { display:none; }
+.tl-dot {
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0; z-index:1; position:relative;
+}
+.tl-dot.done { background:var(--teal); color:var(--obsidian); }
+.tl-dot.active { background:var(--gold-dim); border:2px solid var(--gold); color:var(--gold); animation:activeGlow 2s infinite; }
+.tl-dot.pending { background:var(--panel); border:1px solid var(--border); color:var(--text-muted); }
+@keyframes activeGlow { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.3)} 50%{box-shadow:0 0 0 10px rgba(201,168,76,0)} }
+.tl-content { flex:1; padding-top:8px; }
+.tl-title { font-size:13px; color:var(--diamond-white); letter-spacing:1px; margin-bottom:4px; }
+.tl-desc { font-size:11px; color:var(--text-muted); line-height:1.7; margin-bottom:6px; }
+.tl-time { font-size:10px; color:var(--gold); }
+.tl-cert { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--teal); color:var(--teal); font-size:9px; padding:3px 10px; letter-spacing:1px; margin-top:6px; cursor:none; }
+
+/* Rating widget */
+.rating-widget { margin-top:24px; }
+.stars { display:flex; gap:6px; justify-content:center; margin:12px 0; }
+.star { font-size:28px; cursor:none; opacity:0.3; transition:all 0.2s; }
+.star.lit { opacity:1; }
+.star:hover, .star.hover { opacity:1; transform:scale(1.2); }
+.feedback-textarea { width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--diamond-white); padding:12px; font-family:'DM Mono',monospace; font-size:12px; resize:vertical; min-height:80px; outline:none; margin-top:12px; }
+.feedback-textarea:focus { border-color:var(--gold); }
+.feedback-textarea::placeholder { color:var(--text-muted); }
+
+/* Info cards for track side */
+.info-card { background:var(--void); border:1px solid var(--border); padding:20px; margin-bottom:16px; }
+.info-card-title { font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+.info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:11px; }
+.info-row:last-child { border-bottom:none; }
+.ir-key { color:var(--text-muted); }
+.ir-val { color:var(--diamond-white); }
+.ir-val.gold { color:var(--gold); }
+.ir-val.teal { color:var(--teal); }
+
+/* Notification */
+.notification {
+  position:fixed; top:80px; right:24px;
+  background:var(--void); border:1px solid var(--border-gold);
+  padding:16px 20px; z-index:1000;
+  display:flex; align-items:center; gap:12px;
+  animation:notifIn 0.4s ease, notifOut 0.4s ease 3.5s both;
+  pointer-events:none;
+}
+@keyframes notifIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+@keyframes notifOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(30px)} }
+.notif-icon { font-size:20px; }
+.notif-text strong { display:block; font-size:12px; color:var(--gold); letter-spacing:1px; }
+.notif-text span { font-size:11px; color:var(--text-muted); }
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .order-layout{flex-direction:column}
+  .order-summary-col{width:100%}
+  .track-layout{flex-direction:column}
+  .track-side{width:100%}
+  .chat-info-panel{display:none}
+  .rooms-list{width:200px}
+  .design-right{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .selector-cards{grid-template-columns:1fr 1fr}
+  .confirm-steps{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curRing"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">LUMYN</div>
+      <div class="logo-badge">BETA</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">My Journey</div>
+      <div class="nav-item active" onclick="showScreen('design')">
+        <span class="nav-icon">✦</span> AI Design Studio
+      </div>
+      <div class="nav-item" onclick="showScreen('chat')">
+        <span class="nav-icon">💬</span> Chat Rooms
+        <span class="nav-badge teal">3</span>
+      </div>
+      <div class="nav-item" onclick="showScreen('order')">
+        <span class="nav-icon">◈</span> Place Order
+      </div>
+      <div class="nav-item" onclick="showScreen('track')">
+        <span class="nav-icon">◎</span> Track Order
+        <span class="nav-badge">1</span>
+      </div>
+      <div class="nav-section-label">Discover</div>
+      <div class="nav-item" onclick="notify('Designer store coming soon!')">
+        <span class="nav-icon">🏪</span> Designer Store
+      </div>
+      <div class="nav-item" onclick="notify('Saved designs feature coming soon!')">
+        <span class="nav-icon">♡</span> Saved Designs
+      </div>
+      <div class="nav-item" onclick="notify('Inspiration gallery loading!')">
+        <span class="nav-icon">◇</span> Inspiration Gallery
+      </div>
+      <div class="nav-section-label">Account</div>
+      <div class="nav-item" onclick="notify('Profile settings coming soon!')">
+        <span class="nav-icon">◉</span> My Profile
+      </div>
+      <div class="nav-item" onclick="notify('Payment methods page coming soon!')">
+        <span class="nav-icon">◫</span> Payment Methods
+      </div>
+    </nav>
+    <div class="sidebar-order">
+      <div class="order-mini">
+        <div class="order-mini-label">◆ Active Order</div>
+        <div class="order-mini-id">LMN-2025-004821</div>
+        <div class="mini-progress"><div class="mini-progress-fill"></div></div>
+        <div class="mini-progress-label">In Production · Est. Feb 28</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">AI <em>Design Studio</em></div>
+      <div class="topbar-actions">
+        <button class="topbar-btn" onclick="showScreen('design')">◆ Design</button>
+        <button class="topbar-btn" onclick="showScreen('chat')">Chat</button>
+        <button class="topbar-btn" onclick="showScreen('order')">Order</button>
+        <button class="topbar-btn" onclick="showScreen('track')">Track</button>
+        <div class="user-avatar">S</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: AI DESIGN -->
+    <div class="screen active design-screen" id="screen-design">
+      <div class="design-left">
+        <div class="chat-area" id="designChat">
+          <!-- Prefilled conversation -->
+          <div class="msg ai">
+            <div class="msg-ava">◆</div>
+            <div class="msg-body">
+              <div class="msg-meta">LUMYN AI <span class="time">09:00</span></div>
+              <div class="msg-bubble">
+                Welcome to your <strong>LUMYN Design Studio</strong>. Tell me anything — what type of jewellery you want, the occasion, your style, metal preference, stone type, and budget. I'll generate exclusive designs and connect you with verified designers. <span class="teal">All conversations are recorded for your security.</span>
+              </div>
+            </div>
+          </div>
+          <div class="msg user">
+            <div class="msg-ava">S</div>
+            <div class="msg-body">
+              <div class="msg-meta" style="text-align:right">You <span class="time">09:02</span></div>
+              <div class="msg-bubble">I want a diamond engagement ring for my partner. She loves vintage art deco styles, rose gold, pear-shaped diamond. Budget is around $8,500.</div>
+            </div>
+          </div>
+          <div class="msg ai">
+            <div class="msg-ava">◆</div>
+            <div class="msg-body">
+              <div class="msg-meta">LUMYN AI <span class="time">09:02</span></div>
+              <div class="msg-bubble">
+                Exquisite taste. I've generated <strong>4 bespoke Art Deco designs</strong> in rose gold with ethically sourced pear-cut diamonds, all within your budget:
+                <div class="design-options">
+                  <div class="design-opt chosen" onclick="selectDesign(this,'Art Deco Halo','$8,200','1.0ct D/VS1')">
+                    <div class="chosen-mark">✓</div>
+                    <div class="opt-gem">💍</div>
+                    <div class="opt-name">Art Deco Halo</div>
+                    <div class="opt-price">$8,200 · 1.0ct D/VS1</div>
+                  </div>
+                  <div class="design-opt" onclick="selectDesign(this,'Gatsby Solitaire','$7,900','0.9ct E/VVS2')">
+                    <div class="opt-gem">💎</div>
+                    <div class="opt-name">Gatsby Solitaire</div>
+                    <div class="opt-price">$7,900 · 0.9ct E/VVS2</div>
+                  </div>
+                  <div class="design-opt" onclick="selectDesign(this,'Tiffany Milgrain','$8,450','1.1ct F/VS2')">
+                    <div class="opt-gem">✨</div>
+                    <div class="opt-name">Tiffany Milgrain</div>
+                    <div class="opt-price">$8,450 · 1.1ct F/VS2</div>
+                  </div>
+                  <div class="design-opt" onclick="selectDesign(this,'Filigree Pavé','$8,100','0.95ct G/VVS1')">
+                    <div class="opt-gem">🌟</div>
+                    <div class="opt-name">Filigree Pavé</div>
+                    <div class="opt-price">$8,100 · 0.95ct G/VVS1</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="msg ai" id="designerSelectMsg" style="display:none">
+            <div class="msg-ava">◆</div>
+            <div class="msg-body">
+              <div class="msg-meta">LUMYN AI <span class="time">09:04</span></div>
+              <div class="msg-bubble">
+                Excellent choice! Here are <strong>3 verified designers</strong> who specialise in Art Deco rose gold rings and are available immediately. Click to open a private chat room:
+                <div class="designer-cards">
+                  <div class="designer-card" onclick="goToDesignerChat('Anna Voss')">
+                    <div class="d-avatar" style="background:rgba(232,176,184,0.15);border-color:var(--rose)">👩</div>
+                    <div class="d-info">
+                      <div class="d-name">Anna Voss</div>
+                      <div class="d-meta"><span class="d-rating">★★★★★</span> 4.9 · 312 reviews · Antwerp, Belgium</div>
+                      <div class="d-meta">Avg delivery: 21 days · Speciality: Art Deco</div>
+                    </div>
+                    <button class="d-btn" id="dBtn1">Chat ◆</button>
+                  </div>
+                  <div class="designer-card" onclick="goToDesignerChat('Priya Mehta')">
+                    <div class="d-avatar" style="background:rgba(201,168,76,0.1);border-color:var(--gold)">👩‍🎨</div>
+                    <div class="d-info">
+                      <div class="d-name">Priya Mehta</div>
+                      <div class="d-meta"><span class="d-rating">★★★★★</span> 4.8 · 198 reviews · Jaipur, India</div>
+                      <div class="d-meta">Avg delivery: 18 days · Speciality: Vintage</div>
+                    </div>
+                    <button class="d-btn" id="dBtn2">Chat ◆</button>
+                  </div>
+                  <div class="designer-card" onclick="goToDesignerChat('Jean-Marc Dupont')">
+                    <div class="d-avatar" style="background:rgba(0,212,170,0.1);border-color:var(--teal)">🧑‍🎨</div>
+                    <div class="d-info">
+                      <div class="d-name">Jean-Marc Dupont</div>
+                      <div class="d-meta"><span class="d-rating">★★★★☆</span> 4.7 · 441 reviews · Paris, France</div>
+                      <div class="d-meta">Avg delivery: 35 days · Speciality: Fine Art</div>
+                    </div>
+                    <button class="d-btn" id="dBtn3">Chat ◆</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <button class="attach-btn" onclick="notify('File upload: attach reference images, sketches or inspiration')">📎</button>
+          <textarea id="designInput" placeholder="Describe your dream jewellery or ask about materials, stones, pricing..." onkeydown="handleDesignChat(event)"></textarea>
+          <button class="send-btn" onclick="sendDesignMsg()">➤</button>
+        </div>
+      </div>
+
+      <!-- Right panel -->
+      <div class="design-right">
+        <div class="design-panel">
+          <div class="panel-section">
+            <div class="panel-label">◆ Selected Design</div>
+            <div class="summary-ring">
+              <div class="ring-visual" id="panelGem">💍</div>
+              <div class="ring-name" id="panelName">Art Deco Halo</div>
+              <div class="ring-subtitle" id="panelSub">Rose Gold · Pear Cut · 1.0ct</div>
+            </div>
+          </div>
+          <div class="panel-section">
+            <div class="panel-label">◆ Specifications</div>
+            <div class="spec-list">
+              <div class="spec-item"><span class="spec-key">Metal</span><span class="spec-val">18K Rose Gold</span></div>
+              <div class="spec-item"><span class="spec-key">Stone</span><span class="spec-val">Natural Diamond</span></div>
+              <div class="spec-item"><span class="spec-key">Cut</span><span class="spec-val">Pear</span></div>
+              <div class="spec-item"><span class="spec-key">Carat</span><span class="spec-val gold" id="panelCarat">1.0ct</span></div>
+              <div class="spec-item"><span class="spec-key">Colour</span><span class="spec-val">D</span></div>
+              <div class="spec-item"><span class="spec-key">Clarity</span><span class="spec-val">VS1</span></div>
+              <div class="spec-item"><span class="spec-key">Certificate</span><span class="spec-val">GIA</span></div>
+              <div class="spec-item"><span class="spec-key">Setting</span><span class="spec-val">Halo + Milgrain</span></div>
+              <div class="spec-item"><span class="spec-key">Price</span><span class="spec-val gold" id="panelPrice">$8,200</span></div>
+            </div>
+          </div>
+          <div class="panel-section">
+            <div class="panel-label">◆ Quick Actions</div>
+            <div class="quick-btns">
+              <button class="quick-btn cta" onclick="showScreen('order')"><span class="qb-icon">◈</span> Proceed to Order</button>
+              <button class="quick-btn" onclick="showScreen('chat')"><span class="qb-icon">💬</span> Chat with Designer</button>
+              <button class="quick-btn" onclick="notify('Design saved to your favourites!')"><span class="qb-icon">♡</span> Save to Favourites</button>
+              <button class="quick-btn" onclick="notify('Sharing link copied to clipboard!')"><span class="qb-icon">◫</span> Share Design</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: CHAT ROOMS -->
+    <div class="screen chatroom-screen" id="screen-chat">
+      <!-- Rooms list -->
+      <div class="rooms-list">
+        <div class="rooms-header">
+          <h3>◆ Chat Rooms</h3>
+          <p>Verified conversations only</p>
+        </div>
+        <div class="rooms-scroll">
+          <div class="room-item active" onclick="switchRoom('anna')">
+            <div class="room-ava" style="background:rgba(232,176,184,0.1);border-color:var(--rose)">👩</div>
+            <div class="room-info">
+              <div class="room-name">Anna Voss</div>
+              <div class="room-preview">Sure! I can send the CAD files shortly...</div>
+              <div class="room-role">Designer · Antwerp</div>
+            </div>
+            <div class="room-meta">
+              <div class="room-time">09:14</div>
+              <div class="room-unread">2</div>
+            </div>
+          </div>
+          <div class="room-item" onclick="switchRoom('dealer')">
+            <div class="room-ava" style="background:rgba(201,168,76,0.1);border-color:var(--gold)">💎</div>
+            <div class="room-info">
+              <div class="room-name">Diamond Elite Trading</div>
+              <div class="room-preview">The GIA certificate for the D/VS1 stone...</div>
+              <div class="room-role">Dealer · Antwerp Exchange</div>
+            </div>
+            <div class="room-meta">
+              <div class="room-time">Yesterday</div>
+              <div class="room-unread">1</div>
+            </div>
+          </div>
+          <div class="room-item" onclick="switchRoom('support')">
+            <div class="room-ava" style="background:var(--teal-dim);border-color:var(--teal)">◆</div>
+            <div class="room-info">
+              <div class="room-name">LUMYN Support</div>
+              <div class="room-preview">Your order has been confirmed and funds held...</div>
+              <div class="room-role">Platform · Trust & Safety</div>
+            </div>
+            <div class="room-meta">
+              <div class="room-time">Feb 15</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live chat -->
+      <div class="live-chat">
+        <div class="live-chat-header">
+          <div class="live-chat-ava" id="chatRoomAva">👩</div>
+          <div class="live-chat-info">
+            <div class="live-chat-name" id="chatRoomName">Anna Voss — Jewellery Designer</div>
+            <div class="live-chat-status" id="chatRoomStatus">Online now · Antwerp, Belgium</div>
+          </div>
+          <div class="live-chat-actions">
+            <button class="icon-btn" title="Video call" onclick="notify('Video call feature — opening secure call room...')">📹</button>
+            <button class="icon-btn" title="View profile" onclick="notify('Loading verified designer profile...')">👤</button>
+            <button class="icon-btn" title="Order details" onclick="showScreen('track')">◎</button>
+          </div>
+        </div>
+        <div class="security-bar">
+          🔒 &nbsp;<strong>RECORDED & SECURED</strong>&nbsp; <span>All messages in this room are encrypted and stored for dispute resolution. Order #LMN-2025-004821</span>
+        </div>
+        <div class="live-messages" id="liveMessages">
+          <div class="day-divider"><span>Today, February 24</span></div>
+          <div class="lmsg">
+            <div class="lmsg-ava" style="background:rgba(232,176,184,0.1);border-color:var(--rose)">👩</div>
+            <div class="lmsg-content">
+              <div class="lmsg-name">Anna Voss</div>
+              <div class="lmsg-text">Hello! I'm so excited to work on your engagement ring. I've reviewed your brief — Art Deco Halo in rose gold with a pear cut. This is my absolute speciality. I have some questions about sizing and any specific milgrain details you want.</div>
+              <div class="lmsg-time">09:02</div>
+            </div>
+          </div>
+          <div class="lmsg self">
+            <div class="lmsg-ava" style="background:var(--gold);color:var(--obsidian)">S</div>
+            <div class="lmsg-content">
+              <div class="lmsg-name">You</div>
+              <div class="lmsg-text">Hi Anna! So happy to connect. Ring size UK M / US 6.5. I'd love extra milgrain detail along the band — very Art Deco feel. Partner loves intricate detail.</div>
+              <div class="lmsg-time">09:06</div>
+            </div>
+          </div>
+          <div class="lmsg">
+            <div class="lmsg-ava" style="background:rgba(232,176,184,0.1);border-color:var(--rose)">👩</div>
+            <div class="lmsg-content">
+              <div class="lmsg-name">Anna Voss</div>
+              <div class="lmsg-text">Perfect. I'll design a full milgrain border with Art Deco chevron shoulders. I'm also sending the initial CAD sketch — this is exactly what I have in mind for the setting.</div>
+              <div class="lmsg-file">
+                <span class="file-icon">📐</span>
+                <div class="file-info">
+                  <strong>ArtDeco_Halo_v1_CAD.pdf</strong>
+                  <div class="file-size">2.4 MB · Design file</div>
+                </div>
+                <span style="color:var(--gold);font-size:12px">View ◆</span>
+              </div>
+              <div class="lmsg-time">09:08</div>
+            </div>
+          </div>
+          <div class="lmsg self">
+            <div class="lmsg-ava" style="background:var(--gold);color:var(--obsidian)">S</div>
+            <div class="lmsg-content">
+              <div class="lmsg-name">You</div>
+              <div class="lmsg-text">This looks absolutely stunning! The chevron detail is exactly what I envisioned. Can we confirm the diamond specs — I want to make sure it's the D/VS1 GIA certified stone.</div>
+              <div class="lmsg-time">09:10</div>
+            </div>
+          </div>
+          <div class="lmsg">
+            <div class="lmsg-ava" style="background:rgba(232,176,184,0.1);border-color:var(--rose)">👩</div>
+            <div class="lmsg-content">
+              <div class="lmsg-name">Anna Voss</div>
+              <div class="lmsg-text">Absolutely. I've already confirmed with our dealer — Diamond Elite Trading — for a 1.0ct Pear, D colour, VS1 clarity with GIA certificate. I'm attaching the dealer's stone certificate now:</div>
+              <div class="lmsg-file">
+                <span class="file-icon">📋</span>
+                <div class="file-info">
+                  <strong>GIA_Certificate_2024893.pdf</strong>
+                  <div class="file-size">1.1 MB · Authenticity certificate</div>
+                </div>
+                <span style="color:var(--teal);font-size:12px">Verified ✓</span>
+              </div>
+              <div class="lmsg-text" style="margin-top:8px">Sure! I can send the CAD files shortly for your final approval before I begin crafting.</div>
+              <div class="lmsg-time">09:14</div>
+            </div>
+          </div>
+        </div>
+        <!-- Input -->
+        <div class="chat-input-bar">
+          <button class="attach-btn" onclick="notify('Attach files: photos, sketches, reference images')">📎</button>
+          <textarea id="liveInput" placeholder="Type your message... (all messages are recorded for security)" onkeydown="handleLiveChat(event)"></textarea>
+          <button class="send-btn" onclick="sendLiveMsg()">➤</button>
+        </div>
+      </div>
+
+      <!-- Info panel -->
+      <div class="chat-info-panel">
+        <div>
+          <div class="info-section-title">◆ Designer Profile</div>
+          <div class="info-designer-card">
+            <div class="info-d-ava">👩</div>
+            <div class="info-d-name">Anna Voss</div>
+            <div class="info-d-role">Certified Jewellery Designer</div>
+            <div class="info-d-rating">★★★★★ 4.9 · 312 reviews</div>
+            <div style="margin-top:8px"><span class="info-badge">✓ VERIFIED</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="info-section-title">◆ This Order</div>
+          <div class="spec-list">
+            <div class="spec-item"><span class="spec-key">Design</span><span class="spec-val">Art Deco Halo</span></div>
+            <div class="spec-item"><span class="spec-key">Metal</span><span class="spec-val">18K Rose Gold</span></div>
+            <div class="spec-item"><span class="spec-key">Diamond</span><span class="spec-val">1.0ct D/VS1</span></div>
+            <div class="spec-item"><span class="spec-key">Price</span><span class="spec-val gold">$8,200</span></div>
+            <div class="spec-item"><span class="spec-key">Status</span><span class="spec-val" style="color:var(--teal)">In Chat</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="info-section-title">◆ Shared Files</div>
+          <div class="shared-files">
+            <div class="shared-file">
+              <span class="sf-icon">📐</span>
+              <span class="sf-name">ArtDeco_Halo_v1_CAD.pdf</span>
+            </div>
+            <div class="shared-file">
+              <span class="sf-icon">📋</span>
+              <span class="sf-name">GIA_Certificate.pdf</span>
+            </div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <button class="quick-btn cta" onclick="showScreen('order')"><span class="qb-icon">◈</span> Confirm & Pay</button>
+          <button class="quick-btn" onclick="showScreen('track')"><span class="qb-icon">◎</span> Track Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: ORDER FLOW -->
+    <div class="screen" id="screen-order" style="flex-direction:column">
+      <div class="order-screen">
+        <!-- Steps -->
+        <div style="max-width:900px;margin:0 auto 0">
+          <div class="steps-bar" id="stepsBar">
+            <div class="step-item">
+              <div class="step-wrapper">
+                <div class="step-circle active" id="step1">1</div>
+                <div class="step-label">Details</div>
+              </div>
+              <div class="step-line" id="line1"></div>
+            </div>
+            <div class="step-item">
+              <div class="step-wrapper">
+                <div class="step-circle pending" id="step2">2</div>
+                <div class="step-label">Delivery</div>
+              </div>
+              <div class="step-line" id="line2"></div>
+            </div>
+            <div class="step-item">
+              <div class="step-wrapper">
+                <div class="step-circle pending" id="step3">3</div>
+                <div class="step-label">Payment</div>
+              </div>
+              <div class="step-line" id="line3"></div>
+            </div>
+            <div class="step-item">
+              <div class="step-wrapper">
+                <div class="step-circle pending" id="step4">✓</div>
+                <div class="step-label">Confirm</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-panels" style="margin-top:60px">
+          <div class="order-layout">
+            <div class="order-form-col">
+
+              <!-- PANEL 1: ORDER DETAILS -->
+              <div class="order-panel active" id="panel1">
+                <div class="order-section-header">
+                  <div class="order-section-eyebrow">◆ Step 1 of 4</div>
+                  <h2 class="order-section-title">Order <em>Details</em></h2>
+                </div>
+
+                <div class="panel-label" style="margin-bottom:14px">◆ Type of Jewellery</div>
+                <div class="selector-cards" style="grid-template-columns:repeat(4,1fr)">
+                  <div class="sel-card selected" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">💍</div>
+                    <div class="sel-name">Ring</div>
+                    <div class="sel-desc">Engagement, wedding, fashion</div>
+                  </div>
+                  <div class="sel-card" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">📿</div>
+                    <div class="sel-name">Necklace</div>
+                    <div class="sel-desc">Pendant, chain, choker</div>
+                  </div>
+                  <div class="sel-card" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">👂</div>
+                    <div class="sel-name">Earrings</div>
+                    <div class="sel-desc">Studs, drops, hoops</div>
+                  </div>
+                  <div class="sel-card" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">⌚</div>
+                    <div class="sel-name">Bracelet</div>
+                    <div class="sel-desc">Bangle, tennis, cuff</div>
+                  </div>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Selected Design</label>
+                    <input class="form-input" value="Art Deco Halo — Rose Gold" readonly style="color:var(--gold)">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Designer</label>
+                    <input class="form-input" value="Anna Voss — Verified ✓" readonly style="color:var(--teal)">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Diamond Cut</label>
+                    <select class="form-select">
+                      <option selected>Pear Cut</option>
+                      <option>Round Brilliant</option>
+                      <option>Princess Cut</option>
+                      <option>Oval Cut</option>
+                      <option>Emerald Cut</option>
+                      <option>Cushion Cut</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Metal Type</label>
+                    <select class="form-select">
+                      <option selected>18K Rose Gold</option>
+                      <option>18K Yellow Gold</option>
+                      <option>Platinum</option>
+                      <option>18K White Gold</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ring Size</label>
+                    <select class="form-select">
+                      <option>UK L / US 6</option>
+                      <option selected>UK M / US 6.5</option>
+                      <option>UK N / US 7</option>
+                      <option>UK O / US 7.5</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Diamond Source</label>
+                    <select class="form-select">
+                      <option selected>Natural — GIA Certified</option>
+                      <option></option>
+                    </select>
+                  </div>
+                  <div class="form-group full">
+                    <label class="form-label">Special Instructions</label>
+                    <textarea class="form-textarea" placeholder="Any specific engraving, additional details, or customisation notes...">Extra milgrain detail along the band — very Art Deco feel. Intricate chevron shoulder detail.</textarea>
+                  </div>
+                </div>
+
+                <div class="order-nav-btns">
+                  <button class="btn-back" onclick="showScreen('chat')">← Back to Chat</button>
+                  <button class="btn-next" onclick="goToStep(2)">Delivery Details →</button>
+                </div>
+              </div>
+
+              <!-- PANEL 2: DELIVERY -->
+              <div class="order-panel" id="panel2">
+                <div class="order-section-header">
+                  <div class="order-section-eyebrow">◆ Step 2 of 4</div>
+                  <h2 class="order-section-title">Delivery <em>Address</em></h2>
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input class="form-input" placeholder="Sarah" value="Sarah">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input class="form-input" placeholder="Johnson" value="Johnson">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input class="form-input" placeholder="sarah@email.com" value="sarah@email.com">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input class="form-input" placeholder="+1 555 000 0000" value="+267 71 234 567">
+                  </div>
+                  <div class="form-group full">
+                    <label class="form-label">Street Address</label>
+                    <input class="form-input" placeholder="123 Main Street, Apt 4B">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">City</label>
+                    <input class="form-input" placeholder="Gaborone" value="Gaborone">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Country</label>
+                    <select class="form-select">
+                      <option selected>Botswana</option>
+                      <option>South Africa</option>
+                      <option>United Kingdom</option>
+                      <option>United States</option>
+                      <option>United Arab Emirates</option>
+                      <option>Belgium</option>
+                      <option>France</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="panel-label" style="margin-bottom:14px">◆ Shipping Method</div>
+                <div class="selector-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:0">
+                  <div class="sel-card" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">✈️</div>
+                    <div class="sel-name">Standard</div>
+                    <div class="sel-desc">7-10 business days · Free</div>
+                  </div>
+                  <div class="sel-card selected" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">🚀</div>
+                    <div class="sel-name">Express</div>
+                    <div class="sel-desc">3-5 business days · $45</div>
+                  </div>
+                  <div class="sel-card" onclick="selectCard(this)">
+                    <div class="sel-check">✓</div>
+                    <div class="sel-icon">💎</div>
+                    <div class="sel-name">White Glove</div>
+                    <div class="sel-desc">Hand-delivered, insured · $180</div>
+                  </div>
+                </div>
+
+                <div class="order-nav-btns">
+                  <button class="btn-back" onclick="goToStep(1)">← Back</button>
+                  <button class="btn-next" onclick="goToStep(3)">Payment →</button>
+                </div>
+              </div>
+
+              <!-- PANEL 3: PAYMENT -->
+              <div class="order-panel" id="panel3">
+                <div class="order-section-header">
+                  <div class="order-section-eyebrow">◆ Step 3 of 4</div>
+                  <h2 class="order-section-title">Secure <em>Payment</em></h2>
+                </div>
+
+                <div class="panel-label" style="margin-bottom:14px">◆ Payment Method</div>
+                <div class="payment-methods">
+                  <div class="pay-method selected" onclick="selectPayment(this)">
+                    <div class="pm-icon">💳</div>
+                    <div class="pm-name">Card</div>
+                  </div>
+                  <div class="pay-method" onclick="selectPayment(this)">
+                    <div class="pm-icon">🏦</div>
+                    <div class="pm-name">Bank Transfer</div>
+                  </div>
+                  <div class="pay-method" onclick="selectPayment(this)">
+                    <div class="pm-icon">₿</div>
+                    <div class="pm-name">Crypto</div>
+                  </div>
+                  <div class="pay-method" onclick="selectPayment(this)">
+                    <div class="pm-icon">📱</div>
+                    <div class="pm-name">Mobile Pay</div>
+                  </div>
+                </div>
+
+                <div class="card-fields">
+                  <div class="form-group">
+                    <label class="form-label">Cardholder Name</label>
+                    <input class="form-input" placeholder="Sarah Johnson" value="Sarah Johnson">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Card Number</label>
+                    <input class="form-input" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="formatCard(this)">
+                  </div>
+                  <div class="card-row">
+                    <div class="form-group">
+                      <label class="form-label">Expiry</label>
+                      <input class="form-input" placeholder="MM / YY" maxlength="7">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">CVV</label>
+                      <input class="form-input" placeholder="•••" type="password" maxlength="3">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Currency</label>
+                      <select class="form-select">
+                        <option>USD $</option>
+                        <option>BWP P</option>
+                        <option>ZAR R</option>
+                        <option>EUR €</option>
+                        <option>GBP £</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="escrow-note" style="margin-top:20px">
+                  <strong>🔒 Secure Escrow Payment</strong>
+                  Your payment is held securely in escrow by LUMYN. Funds are only released to the designer when you confirm delivery and satisfaction. You are fully protected.
+                </div>
+
+                <div class="order-nav-btns">
+                  <button class="btn-back" onclick="goToStep(2)">← Back</button>
+                  <button class="btn-next pulse" onclick="goToStep(4)">Confirm Order ◆</button>
+                </div>
+              </div>
+
+              <!-- PANEL 4: CONFIRMATION -->
+              <div class="order-panel" id="panel4">
+                <div class="confirm-screen">
+                  <div class="confirm-diamond">💍</div>
+                  <h2 class="confirm-title">Order <em>Placed!</em></h2>
+                  <p class="confirm-sub">Your order has been confirmed and funds are held safely in escrow. Anna Voss has been notified and will begin crafting your ring. You will receive updates every step of the way.</p>
+                  <div class="confirm-id">ORDER #LMN-2025-004821</div>
+                  <div class="confirm-steps">
+                    <div class="confirm-step">
+                      <div class="cs-icon">💳</div>
+                      <div class="cs-label">Payment Secured</div>
+                      <div class="cs-time">✓ Done</div>
+                    </div>
+                    <div class="confirm-step">
+                      <div class="cs-icon">💎</div>
+                      <div class="cs-label">Stone Sourcing</div>
+                      <div class="cs-time">Est. 2 days</div>
+                    </div>
+                    <div class="confirm-step">
+                      <div class="cs-icon">🔨</div>
+                      <div class="cs-label">Crafting</div>
+                      <div class="cs-time">Est. 14 days</div>
+                    </div>
+                    <div class="confirm-step">
+                      <div class="cs-icon">📦</div>
+                      <div class="cs-label">Delivery</div>
+                      <div class="cs-time">Est. 21 days</div>
+                    </div>
+                  </div>
+                  <div class="confirm-btns">
+                    <button class="btn-next" onclick="showScreen('track')">Track Your Order →</button>
+                    <button class="btn-back" onclick="showScreen('chat')">Message Anna →</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ORDER SUMMARY -->
+            <div class="order-summary-col" id="orderSummaryCol">
+              <div class="summary-card">
+                <div class="summary-title">◆ Order Summary</div>
+                <div class="summary-ring" style="margin-bottom:16px">
+                  <div class="ring-visual">💍</div>
+                  <div class="ring-name" style="font-size:16px">Art Deco Halo</div>
+                  <div class="ring-subtitle">Anna Voss · Antwerp</div>
+                </div>
+                <div class="summary-item"><span class="s-key">Design Price</span><span class="s-val">$8,200</span></div>
+                <div class="summary-item"><span class="s-key">1.0ct D/VS1 Diamond</span><span class="s-val">Included</span></div>
+                <div class="summary-item"><span class="s-key">GIA Certificate</span><span class="s-val gold">Included</span></div>
+                <div class="summary-item"><span class="s-key">18K Rose Gold</span><span class="s-val">Included</span></div>
+                <div class="summary-item"><span class="s-key">Express Shipping</span><span class="s-val">$45</span></div>
+                <div class="summary-item"><span class="s-key">Platform Fee (3.5%)</span><span class="s-val">$287</span></div>
+                <div class="summary-total">
+                  <span class="total-label">Total</span>
+                  <span class="total-amount">$8,532</span>
+                </div>
+                <div class="escrow-note">
+                  <strong>🔒 Escrow Protected</strong>
+                  Funds released only when you confirm delivery & satisfaction.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: TRACK ORDER -->
+    <div class="screen" id="screen-track" style="flex-direction:column">
+      <div class="track-screen">
+        <div class="track-layout">
+          <div class="track-main">
+            <div class="order-section-header" style="margin-bottom:24px">
+              <div class="order-section-eyebrow">◆ Live Order Tracking</div>
+              <h2 class="order-section-title">Your <em>Journey</em></h2>
+            </div>
+
+            <div class="track-header-card">
+              <div>
+                <div class="track-order-id">#LMN-2025-004821</div>
+                <div class="track-order-sub">Art Deco Halo Ring · Anna Voss · Placed Feb 15, 2025</div>
+              </div>
+              <div class="track-status-pill">In Production</div>
+            </div>
+
+            <div class="track-progress-bar">
+              <div class="tpb-labels">
+                <span class="tpb-label active">Confirmed</span>
+                <span class="tpb-label active">Sourced</span>
+                <span class="tpb-label active">Production</span>
+                <span class="tpb-label">QC</span>
+                <span class="tpb-label">Shipped</span>
+                <span class="tpb-label">Delivered</span>
+              </div>
+              <div class="tpb-bar"><div class="tpb-fill" id="progressFill"></div></div>
+            </div>
+
+            <div class="timeline">
+              <div class="tl-event">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-content">
+                  <div class="tl-title">Order Confirmed & Payment Secured</div>
+                  <div class="tl-desc">Your payment of $8,532 is held in secure escrow. Anna Voss accepted the commission within 4 minutes of placing your order.</div>
+                  <div class="tl-time">Feb 15, 2025 · 09:42 AM</div>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-content">
+                  <div class="tl-title">Design Finalised & Approved</div>
+                  <div class="tl-desc">You approved the Art Deco Halo CAD design (v3). Final specifications locked: UK M, chevron milgrain shoulders, 18K rose gold setting.</div>
+                  <div class="tl-time">Feb 17, 2025 · 02:15 PM</div>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot done">✓</div>
+                <div class="tl-content">
+                  <div class="tl-title">Diamond Sourced & Certified</div>
+                  <div class="tl-desc">1.0ct Pear Cut, D colour, VS1 clarity confirmed with Diamond Elite Trading. Stone verified and received by Anna's studio.</div>
+                  <div class="tl-time">Feb 19, 2025 · 11:00 AM</div>
+                  <span class="tl-cert">📋 GIA Certificate #2024893 ✓</span>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot active">🔨</div>
+                <div class="tl-content">
+                  <div class="tl-title">In Production — Anna's Studio, Antwerp</div>
+                  <div class="tl-desc">Anna Voss is hand-crafting your ring at her studio. The rose gold setting has been cast and the milgrain detailing is underway. Estimated completion Feb 28.</div>
+                  <div class="tl-time">Started Feb 20, 2025 · Est. complete Feb 28</div>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot pending">○</div>
+                <div class="tl-content">
+                  <div class="tl-title">Quality Control & Professional Photography</div>
+                  <div class="tl-desc">Final ring inspected and photographed from multiple angles before shipping. You will approve photos before dispatch.</div>
+                  <div class="tl-time">Est. Mar 1-2, 2025</div>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot pending">✈</div>
+                <div class="tl-content">
+                  <div class="tl-title">Shipped — Express Insured International</div>
+                  <div class="tl-desc">Fully insured express shipping from Antwerp. Real-time tracking number provided. Signature required on delivery.</div>
+                  <div class="tl-time">Est. Mar 3-5, 2025</div>
+                </div>
+              </div>
+              <div class="tl-event">
+                <div class="tl-dot pending">💍</div>
+                <div class="tl-content">
+                  <div class="tl-title">Delivered & Confirmed</div>
+                  <div class="tl-desc">Once you confirm delivery and satisfaction, escrow funds are released to Anna Voss. Please leave your feedback and rating.</div>
+                  <div class="tl-time">Est. Mar 7-8, 2025</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feedback section -->
+            <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:32px">
+              <div class="order-section-eyebrow">◆ Your Feedback</div>
+              <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:8px">Rate Your <em style="color:var(--gold)">Experience</em></h3>
+              <p style="font-size:11px;color:var(--text-muted);margin-bottom:20px">Your feedback shapes the LUMYN community and helps other customers choose the best designers.</p>
+              <div class="stars" id="stars">
+                <span class="star" onclick="rateStar(1)">★</span>
+                <span class="star" onclick="rateStar(2)">★</span>
+                <span class="star" onclick="rateStar(3)">★</span>
+                <span class="star" onclick="rateStar(4)">★</span>
+                <span class="star" onclick="rateStar(5)">★</span>
+              </div>
+              <textarea class="feedback-textarea" placeholder="Share your experience with Anna Voss and the LUMYN platform..."></textarea>
+              <div style="margin-top:12px;display:flex;gap:12px">
+                <button class="btn-next" onclick="notify('Thank you! Your feedback has been recorded and published.')">Submit Feedback</button>
+                <button class="btn-back" onclick="showScreen('chat')">Message Designer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side info -->
+          <div class="track-side">
+            <div class="info-card">
+              <div class="info-card-title">◆ Order Details</div>
+              <div class="info-row"><span class="ir-key">Order ID</span><span class="ir-val gold">#LMN-2025-004821</span></div>
+              <div class="info-row"><span class="ir-key">Design</span><span class="ir-val">Art Deco Halo</span></div>
+              <div class="info-row"><span class="ir-key">Designer</span><span class="ir-val">Anna Voss</span></div>
+              <div class="info-row"><span class="ir-key">Diamond</span><span class="ir-val">1.0ct D/VS1 GIA</span></div>
+              <div class="info-row"><span class="ir-key">Metal</span><span class="ir-val">18K Rose Gold</span></div>
+              <div class="info-row"><span class="ir-key">Total Paid</span><span class="ir-val gold">$8,532</span></div>
+              <div class="info-row"><span class="ir-key">Escrow Status</span><span class="ir-val teal">Held — Protected</span></div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">◆ Designer Info</div>
+              <div style="text-align:center;padding:16px 0">
+                <div style="font-size:40px;margin-bottom:8px">👩</div>
+                <div style="font-size:14px;color:var(--diamond-white);margin-bottom:4px">Anna Voss</div>
+                <div style="font-size:10px;color:var(--teal);letter-spacing:1px">◆ VERIFIED DESIGNER</div>
+                <div style="font-size:12px;color:var(--gold);margin-top:6px">★★★★★ 4.9</div>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:2px">312 reviews · Antwerp, Belgium</div>
+                <button class="quick-btn" style="margin-top:14px;width:100%;justify-content:center" onclick="showScreen('chat')"><span class="qb-icon">💬</span>Message</button>
+              </div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-title">◆ Documents</div>
+              <div class="shared-files">
+                <div class="shared-file">
+                  <span class="sf-icon">📋</span>
+                  <span class="sf-name">GIA_Certificate.pdf</span>
+                </div>
+                <div class="shared-file">
+                  <span class="sf-icon">📐</span>
+                  <span class="sf-name">Design_CAD_v3.pdf</span>
+                </div>
+                <div class="shared-file">
+                  <span class="sf-icon">🧾</span>
+                  <span class="sf-name">Invoice_LMN-004821.pdf</span>
+                </div>
+                <div class="shared-file">
+                  <span class="sf-icon">📦</span>
+                  <span class="sf-name">Shipping_Insurance.pdf</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Notification popup -->
+<div class="notification" id="notif" style="display:none">
+  <span class="notif-icon">◆</span>
+  <div class="notif-text">
+    <strong id="notifTitle">LUMYN</strong>
+    <span id="notifMsg">Action completed</span>
+  </div>
+</div>
+
+<script>
+// === CURSOR ===
+const cur = document.getElementById('cur');
+const ring = document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.transform=`translate(${mx-4}px,${my-4}px)`;
+});
+(function animRing(){
+  rx+=(mx-rx-16)*0.12; ry+=(my-ry-16)*0.12;
+  ring.style.transform=`translate(${rx}px,${ry}px)`;
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('button,input,select,textarea,.nav-item,.room-item,.design-opt,.sel-card,.pay-method,.designer-card,.star,.shared-file,.tl-cert,.lmsg-file').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.opacity='0.8';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='32px';ring.style.height='32px';ring.style.opacity='0.5';});
+});
+
+// === SCREENS ===
+const titles = {
+  design: 'AI <em>Design Studio</em>',
+  chat: 'Live <em>Chat Rooms</em>',
+  order: 'Place Your <em>Order</em>',
+  track: 'Track Your <em>Order</em>'
+};
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('topbarTitle').innerHTML = titles[id];
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navMap={design:0,chat:1,order:2,track:3};
+  document.querySelectorAll('.nav-item')[navMap[id]]?.classList.add('active');
+}
+
+// === NOTIFICATION ===
+let notifTimer;
+function notify(msg) {
+  const n=document.getElementById('notif');
+  document.getElementById('notifMsg').textContent=msg;
+  n.style.display='flex'; n.style.animation='notifIn 0.4s ease both';
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>{
+    n.style.animation='notifOut 0.4s ease both';
+    setTimeout(()=>n.style.display='none',400);
+  },3500);
+}
+
+// === DESIGN CHAT ===
+const aiDesignReplies = [
+  "Lovely idea! I've generated 3 new concepts. Would you like natural certified or natural diamonds for this design? Both come fully certified.",
+  "Great choice. For that aesthetic, I'd also recommend considering a morganite centre stone surrounded by diamond accents — very popular with the new generation and more ethical.",
+  "I can connect you with 5 verified designers who specialise in exactly that style. Shall I show you their portfolios and pricing?",
+  "That budget works beautifully. For $5,000-$8,000 you can get a stunning custom piece. Do you want rose gold, white gold, or platinum setting?",
+  "Wonderful! I've saved that preference. The Art Deco revival is trending heavily right now — excellent taste. Shall I filter designs to this style only?"
+];
+let aiDIdx=0;
+function handleDesignChat(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDesignMsg();}}
+function sendDesignMsg(){
+  const inp=document.getElementById('designInput');
+  const txt=inp.value.trim(); if(!txt)return;
+  const chat=document.getElementById('designChat');
+  const t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  chat.innerHTML+=`<div class="msg user"><div class="msg-ava">S</div><div class="msg-body"><div class="msg-meta" style="text-align:right">You <span class="time">${t}</span></div><div class="msg-bubble">${txt}</div></div></div>`;
+  inp.value='';
+  // typing indicator
+  const typDiv=document.createElement('div');
+  typDiv.className='msg ai';
+  typDiv.innerHTML=`<div class="msg-ava">◆</div><div class="msg-body"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  chat.appendChild(typDiv);
+  chat.scrollTop=chat.scrollHeight;
+  setTimeout(()=>{
+    typDiv.remove();
+    const r=aiDesignReplies[aiDIdx%aiDesignReplies.length]; aiDIdx++;
+    chat.innerHTML+=`<div class="msg ai"><div class="msg-ava">◆</div><div class="msg-body"><div class="msg-meta">LUMYN AI <span class="time">${new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'})}</span></div><div class="msg-bubble">${r}</div></div></div>`;
+    chat.scrollTop=chat.scrollHeight;
+  },1200);
+}
+
+// === DESIGN SELECTION ===
+function selectDesign(el,name,price,carat){
+  document.querySelectorAll('.design-opt').forEach(d=>{d.classList.remove('chosen');const m=d.querySelector('.chosen-mark');if(m)m.remove();});
+  el.classList.add('chosen');
+  const mark=document.createElement('div'); mark.className='chosen-mark'; mark.textContent='✓'; el.prepend(mark);
+  document.getElementById('panelName').textContent=name;
+  document.getElementById('panelPrice').textContent=price;
+  document.getElementById('panelCarat').textContent=carat.split(' ')[0];
+  document.getElementById('panelSub').textContent=`Rose Gold · Pear Cut · ${carat}`;
+  document.getElementById('designerSelectMsg').style.display='flex';
+  document.getElementById('designerSelectMsg').scrollIntoView({behavior:'smooth',block:'nearest'});
+  notify(`Design "${name}" selected! Choose a designer below.`);
+}
+
+// === DESIGNER CHAT ===
+function goToDesignerChat(name){
+  const btns=document.querySelectorAll('.d-btn');
+  btns.forEach(b=>b.textContent='Chat ◆');
+  event.currentTarget?.querySelector('.d-btn')?.classList.add('selected');
+  showScreen('chat');
+  notify(`Opening private room with ${name}...`);
+}
+
+// === LIVE CHAT ===
+const chatReplies={
+  anna:[
+    "Sure! I can send the CAD files shortly. The chevron milgrain detail will look absolutely stunning.",
+    "I've sourced the diamond from our trusted dealer. GIA certificate is attached — 1.0ct D/VS1, perfect for this design.",
+    "Production is going beautifully. I'll send you progress photos by end of week.",
+    "The rose gold setting has been cast and is cooling now. Very excited for you to see this piece."
+  ],
+  dealer:["The GIA certificate for the D/VS1 stone is attached. Ethically sourced, conflict-free.","We have 3 pear-cut options available. Which carat weight would you like to proceed with?"],
+  support:["Your order has been confirmed and funds held in escrow. You are fully protected.","If you have any concerns please reach out. Our trust team is available 24/7."]
+};
+let roomReplies=[...chatReplies.anna];
+let chatRIdx=0;
+function switchRoom(room){
+  document.querySelectorAll('.room-item').forEach(r=>r.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  event.currentTarget.querySelector('.room-unread')?.remove();
+  const configs={
+    anna:{ava:'👩',name:'Anna Voss — Jewellery Designer',status:'Online now · Antwerp, Belgium'},
+    dealer:{ava:'💎',name:'Diamond Elite Trading — Verified Dealer',status:'Online now · Antwerp Diamond Exchange'},
+    support:{ava:'◆',name:'LUMYN Trust & Safety',status:'Online 24/7 · Platform Support'}
+  };
+  const c=configs[room];
+  document.getElementById('chatRoomAva').textContent=c.ava;
+  document.getElementById('chatRoomName').textContent=c.name;
+  document.getElementById('chatRoomStatus').textContent=c.status;
+  roomReplies=[...chatReplies[room]]; chatRIdx=0;
+}
+function handleLiveChat(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendLiveMsg();}}
+function sendLiveMsg(){
+  const inp=document.getElementById('liveInput');
+  const txt=inp.value.trim(); if(!txt)return;
+  const msgs=document.getElementById('liveMessages');
+  const t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+  const selfMsg=document.createElement('div');
+  selfMsg.className='lmsg self';
+  selfMsg.innerHTML=`<div class="lmsg-ava" style="background:var(--gold);color:var(--obsidian)">S</div><div class="lmsg-content"><div class="lmsg-name">You</div><div class="lmsg-text">${txt}</div><div class="lmsg-time">${t}</div></div>`;
+  msgs.appendChild(selfMsg); inp.value='';
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    const r=roomReplies[chatRIdx%roomReplies.length]; chatRIdx++;
+    const avatarContent=document.getElementById('chatRoomAva').textContent;
+    const replyMsg=document.createElement('div');
+    replyMsg.className='lmsg';
+    replyMsg.innerHTML=`<div class="lmsg-ava" style="background:rgba(232,176,184,0.1);border:1px solid var(--rose)">${avatarContent}</div><div class="lmsg-content"><div class="lmsg-name">${document.getElementById('chatRoomName').textContent.split('—')[0].trim()}</div><div class="lmsg-text">${r}</div><div class="lmsg-time">${new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+    msgs.appendChild(replyMsg);
+    msgs.scrollTop=msgs.scrollHeight;
+  },1500);
+}
+
+// === ORDER STEPS ===
+let currentStep=1;
+function goToStep(n){
+  document.getElementById(`panel${currentStep}`).classList.remove('active');
+  currentStep=n;
+  document.getElementById(`panel${currentStep}`).classList.add('active');
+  // Update step indicators
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById(`step${i}`);
+    if(i<n){el.className='step-circle done';el.textContent='✓';}
+    else if(i===n){el.className='step-circle active';el.textContent=i===4?'✓':i;}
+    else{el.className='step-circle pending';el.textContent=i;}
+  }
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById(`line${i}`);
+    if(el)el.className=i<n?'step-line done':'step-line';
+  }
+  if(n===4){
+    notify('🎉 Order confirmed! Your ring is now in production.');
+    document.getElementById('orderSummaryCol').style.display='none';
+  } else {
+    document.getElementById('orderSummaryCol').style.display='block';
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// === CARD SELECTORS ===
+function selectCard(el){
+  const parent=el.parentElement;
+  parent.querySelectorAll('.sel-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectPayment(el){
+  document.querySelectorAll('.pay-method').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function formatCard(inp){
+  let v=inp.value.replace(/\D/g,'').substring(0,16);
+  inp.value=v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+// === STARS ===
+function rateStar(n){
+  document.querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('lit',i<n);
+  });
+  if(n===5)notify('5 stars! Thank you for your amazing feedback for Anna Voss.');
+  else if(n>=4)notify(`${n} stars selected. Please add a written review to help other customers.`);
+}
+
+// === PROGRESS BAR ANIMATION ===
+setTimeout(()=>{
+  const pf=document.getElementById('progressFill');
+  if(pf)pf.style.width='55%';
+},500);
+</script>
+</body>
+</html>
